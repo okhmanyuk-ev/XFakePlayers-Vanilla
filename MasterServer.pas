@@ -1,0 +1,22 @@
+unit MasterServer;
+
+interface
+
+uses Default;
+
+const
+  MS_SERVERLIST_HEADER = '1';
+
+  MS_REGION_US_EAST_COAST = 0;
+  MS_REGION_US_WEST_COAST = 1;
+  MS_REGION_SOUTH_AMERICA = 2;
+  MS_REGION_EUROPE = 3;
+  MS_REGION_ASIA = 4;
+  MS_REGION_AUSTRALIA = 5;
+  MS_REGION_MIDDLE_EAST = 6;
+  MS_REGION_AFRICA = 7;
+  MS_REGION_REST_OF_WORLD = 255;
+
+implementation
+
+end.
