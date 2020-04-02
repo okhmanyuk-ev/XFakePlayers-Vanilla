@@ -327,7 +327,7 @@ begin
   if CMD_ExecuteAlias then
     Exit;
 
-  Print([Format(S_CMD_UNKNOWN_COMMAND, [AnsiLowerCase(CMD.Tokens[0])])]);  // <- client not need to do this, but server need. fix it in xproxy. NAOW!
+  Print([Format('Unknown command "%s"', [AnsiLowerCase(CMD.Tokens[0])])]);  // <- client not need to do this, but server need. fix it in xproxy. NAOW!
   Result := False;
 end;
 

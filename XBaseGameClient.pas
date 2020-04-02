@@ -1091,7 +1091,7 @@ begin
     SVC_BAD:
     begin
       Error(T, [ServerEngineMsgs[B].Name]);
-      Hint(S_LAST_MESSAGES, [CL_GetMessagesHistory]);
+      Hint('Last parsed messages', [CL_GetMessagesHistory]);
       CL_FinalizeConnection;
       Exit;
     end;
@@ -1154,8 +1154,8 @@ begin
     SVC_SENDCVARVALUE: CL_ParseSendCVarValue;
     SVC_SENDCVARVALUE2: CL_ParseSendCVarValue2;
   else
-    Error(T, [Format(S_ENGINE_MESSAGE_ILLEGAL, [B])]);
-    Hint(S_LAST_MESSAGES, [CL_GetMessagesHistory]);
+    Error(T, [Format('Illegal engine message %d', [B])]);
+    Hint('Last parsed messages', [CL_GetMessagesHistory]);
     CL_FinalizeConnection;
     Exit;
   end;
@@ -1174,8 +1174,8 @@ begin
 
   if I = -1 then
   begin
-    Error(T, [Format(S_GAME_EVENT_ILLEGAL, [B])]);
-    Hint(S_LAST_MESSAGES, [CL_GetMessagesHistory]);
+    Error(T, [Format('Illegal game event %d', [B])]);
+    Hint('Last parsed messages', [CL_GetMessagesHistory]);
     CL_FinalizeConnection;
     Exit;
   end;
@@ -2681,8 +2681,8 @@ begin
 
   if not (Index in [DRC_CMD_FIRST..DRC_CMD_LAST]) then
   begin
-    Error(T, [Format(S_DIRECTOR_CMD_ILLEGAL, [Index])]);
-    Hint(S_LAST_MESSAGES, [CL_GetMessagesHistory]);
+    Error(T, [Format('Illegal Director Command %d', [Index])]);
+    Hint('Last parsed messages', [CL_GetMessagesHistory]);
     CL_FinalizeConnection;
     Exit;
   end;
@@ -4148,14 +4148,14 @@ begin
 
   if FConnectionAttempts - 1 > 0 then
     if NET.HasAssociatedProxy then
-      Print(Format(S_RETRYING_CONNECTION_VIA, [Server.ToString, FConnectionAttempts - 1, NET.AssociatedProxy.ToString]))
+      Print(Format('Retrying connection to %s (%d) via %s', [Server.ToString, FConnectionAttempts - 1, NET.AssociatedProxy.ToString]))
     else
-      Print(Format(S_RETRYING_CONNECTION, [Server.ToString, FConnectionAttempts - 1]))
+      Print(Format('Retrying connection to %s (%d)', [Server.ToString, FConnectionAttempts - 1]))
   else
     if NET.HasAssociatedProxy then
-      Print(Format(S_INITIALIZING_CONNECTION_VIA, [Server.ToString, NET.AssociatedProxy.ToString]))
+      Print(Format('Initializing connection to %s via %s', [Server.ToString, NET.AssociatedProxy.ToString]))
     else
-      Print(Format(S_INITIALIZING_CONNECTION, [Server.ToString]))
+      Print(Format('Initializing connection to %s', [Server.ToString]))
 end;
 
 procedure TXBaseGameClient.CL_InitializeConnection;
@@ -4310,7 +4310,7 @@ end;
 
 procedure TXBaseGameClient.CL_FinalizeConnection(IsReconnect: Boolean = False);
 begin
-  CL_FinalizeConnection(S_CLIENT_SENT_DROP, IsReconnect);
+  CL_FinalizeConnection('Client sent ''drop''', IsReconnect);
 end;
 
 procedure TXBaseGameClient.CL_AllocateEntities(ASize: UInt32);
@@ -4370,9 +4370,9 @@ begin
         CL_InitializeConnection
       else
         if NET.HasAssociatedProxy then
-          CL_FinalizeConnection(Format(S_CANNOT_CONNECT_VIA, [Server.ToString, NET.AssociatedProxy.ToString]))
+          CL_FinalizeConnection(Format('Cannot connect to %s via %s', [Server.ToString, NET.AssociatedProxy.ToString]))
         else
-          CL_FinalizeConnection(Format(S_CANNOT_CONNECT, [Server.ToString]))
+          CL_FinalizeConnection(Format('Cannot connect to %s', [Server.ToString]))
     else
   else
     if GetTickCount - Channel.IncomingTime > CL_Timeout * 1000 then
@@ -5194,7 +5194,7 @@ begin
   if CMD_ExecuteFakeCVar then
     Exit;
 
-  Print([Format(S_CMD_UNKNOWN_COMMAND, [AnsiLowerCase(CMD.Tokens[0])])]);
+  Print([Format('Unknown command "%s"', [AnsiLowerCase(CMD.Tokens[0])])]);
 
   if State >= CS_CONNECTION_ACCEPTED then
   begin

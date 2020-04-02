@@ -2,7 +2,7 @@ unit Main;
 
 interface
 
-uses {$REGION 'Include'}
+uses
   System.SysUtils,
   System.Variants,
   System.Classes,
@@ -53,9 +53,7 @@ uses {$REGION 'Include'}
   CVar,
   Protocol,
   BuildTime;
-  {$ENDREGION}
 
-{$REGION 'Interface'}
 const WhiteListEnabled = True;
 
 type
@@ -79,7 +77,6 @@ type
   end;
 
   TEngine = class(TForm)
-    {$REGION 'Objects'}
     ControlPanel: TPanel;
     Start: TButton;
     Stop: TButton;
@@ -188,9 +185,7 @@ type
     RadioButton4: TRadioButton;
     AIEnabled: TCheckBox;
     DownloadWorld: TCheckBox;
-    {$ENDREGION}
 
-    {$REGION 'Events'}
     // native
     procedure OnLog(Sender: TObject; Data: LStr);
     procedure LimeLog(Data: LStr);
@@ -223,9 +218,7 @@ type
     procedure MoveSpeedChange(Sender: TObject);
     procedure BAboutClick(Sender: TObject);
     procedure BNameSelect(Sender: TObject);
-    {$ENDREGION}
 
-    {$REGION 'General'}
     procedure LoadConfig;
     procedure SaveConfig;
     procedure LoadWhitelist;
@@ -258,10 +251,6 @@ type
     procedure ProxyTypeClick(Sender: TObject);
     procedure ResolveIPAddressesForServersClick(Sender: TObject);
     procedure ResolveIPAddressesForProxiesClick(Sender: TObject);
-    {$ENDREGION}
-  private
-
-  public
   end;
 
 var
@@ -301,15 +290,12 @@ const
 var
   Header: LStr;
 
-{$ENDREGION}
-
 implementation
 
 {$R *.dfm}
 
 uses Proxy, Names;
 
-{$REGION 'TXFakePlayer'}
 function TXFakePlayer.GetIdent: LStr;
 begin
   Result := Utf8ToAnsi(GetName) + ' (' + GetServer.ToString + ')';
@@ -421,10 +407,7 @@ begin
       Engine.SilverLogEx(GetIdent, 'FORWARD', RemoveTBytes(Data));
   end);
 end;
-{$ENDREGION}
 
-{$REGION 'Events'}
-  {$REGION 'Native'}
 procedure TEngine.OnLog(Sender: TObject; Data: LStr);
 var
   C: Int32;
@@ -568,9 +551,7 @@ begin
     SelAttributes.Color := clSilver;
   end;
 end;
-  {$ENDREGION}
 
-  {$REGION 'Base Game Client'}
 procedure TEngine.OnConnectionInitialized(Sender: TObject);
 begin
   with TXFakePlayer(Sender), NET do
@@ -637,9 +618,7 @@ begin
   with TXFakePlayer(Sender) do
     Log.Add(GetIdent + ' ' + AData);
 end;
-  {$ENDREGION}
 
-  {$REGION 'Request'}
 function TEngine.RequestNavigation(Sender: TObject): PNavMesh;
 var
   I: Int32;
@@ -673,9 +652,7 @@ begin
   if Worlds.List[Worlds.Add(TWorld.Create)].LoadFromFile(TXFakePlayer(Sender).GetServerInfo.ResolveMapName) = BSP_LOAD_OK then
     goto L1;
 end;
-  {$ENDREGION}
 
-  {$REGION 'Main Engine'}
 procedure TEngine.Edit2KeyDown(Sender: TObject; var Key: Word; Shift: TShiftState);
 begin
   if (Key = 38) and (Cmd_History.Count > 0) then
@@ -890,11 +867,6 @@ begin
   L.Free;
 end;
 
-{$ENDREGION}
-{$ENDREGION}
-
-{$REGION 'General'}
-  {$REGION 'LoadConfig'}
 procedure TEngine.LoadConfig;
 var
   I, J: Int32;
@@ -966,9 +938,7 @@ begin
     Free;
   end;
 end;
-  {$ENDREGION}
 
-  {$REGION 'SaveConfig'}
 procedure TEngine.SaveConfig;
 var
   I, J: Int32;
@@ -1037,9 +1007,7 @@ begin
     Free;
   end;
 end;
-  {$ENDREGION}
 
-  {$REGION 'LoadWhitelist'}
 procedure TEngine.LoadWhitelist;
 begin
   with Whitelist do
@@ -1061,9 +1029,7 @@ begin
 
   end;
 end;
-  {$ENDREGION}
 
-  {$REGION 'CheckForUpdates'}
 procedure TEngine.CheckForUpdates;
 begin
   TThread.CreateAnonymousThread(
@@ -1086,9 +1052,7 @@ begin
     HTTP.Free;
   end).Start;
 end;
-  {$ENDREGION}
 
-  {$REGION 'StartClick'}
 procedure TEngine.StartClick(Sender: TObject);
 var
   T: LStr;
@@ -1126,10 +1090,7 @@ begin
   ListEndsTime := 0;
   Socks5ListEndsTime := 0;
 end;
-  {$ENDREGION}
 
-  {$REGION 'Frame'}
-    {$REGION 'Main'}
 procedure TEngine.FrameTimer(Sender: TObject);
 label
   L1;
@@ -1264,9 +1225,7 @@ begin
 
   IncrementCurrentServer;
 end;
-    {$ENDREGION}
 
-    {$REGION 'UpdateFormIndicators'}
 procedure TEngine.UpdateFormIndicators;
 var
   I: Int;
@@ -1330,9 +1289,7 @@ begin
     LabelEntities.Caption := 'Entities: ' + IntToStr(EntitiesCount);
   end;
 end;
-    {$ENDREGION}
 
-    {$REGION 'UpdateBottomLine'}
 procedure TEngine.UpdateBottomLine;
   function GetAliveCount: UInt32;
   var
@@ -1362,9 +1319,7 @@ begin
 
   Label14.Caption := L;
 end;
-    {$ENDREGION}
 
-    {$REGION 'CleanExternalObjects'}
 procedure TEngine.CleanExternalObjects;
 var
   I, J: Int;
@@ -1408,9 +1363,7 @@ begin
     end;
   end;
 end;
-    {$ENDREGION}
 
-    {$REGION 'InitializeFakePlayer'}
 procedure TEngine.InitializeFakePlayer(var AClient: TXFakePlayer);
   procedure RecursiveNameSearch(var AClient: TXFakePlayer);
   var
@@ -1496,9 +1449,7 @@ begin
     Activate; // <- start framing here
   end;
 end;
-    {$ENDREGION}
 
-    {$REGION 'IncrementCurrentServer'}
 procedure TEngine.IncrementCurrentServer;
 begin
   Inc(CurrentServer);
@@ -1514,9 +1465,7 @@ begin
     CurrentServer := 0;
   end;
 end;
-    {$ENDREGION}
 
-    {$REGION 'Socks5HandlerFrame'}
 procedure TEngine.Socks5HandlerFrame;
 var
   I: Int;
@@ -1574,10 +1523,7 @@ begin
     Socks5ListEndsTime := GetTickCount;
   end;
 end;
-    {$ENDREGION}
-  {$ENDREGION}
 
-  {$REGION 'BStopClick'}
 procedure TEngine.StopClick(Sender: TObject);
 var
   I: Int32;
@@ -1611,16 +1557,12 @@ begin
 
   LimeLog('Stop');
 end;
-{$ENDREGION}
 
-  {$REGION 'Resize'}
 procedure TEngine.FormResize(Sender: TObject);
 begin
 //
 end;
-  {$ENDREGION}
 
-  {$REGION 'FormClose'}
 procedure TEngine.FormClose(Sender: TObject; var Action: TCloseAction);
 begin
   FinalizeAllClients;
@@ -1640,9 +1582,7 @@ begin
 
   SaveConfig;
 end;
-  {$ENDREGION}
 
-  {$REGION 'FormCreate'}
 procedure TEngine.FormCreate(Sender: TObject);
 begin
   Randomize;
@@ -1678,9 +1618,7 @@ begin
 
   LoadWhitelist;
 end;
-{$ENDREGION}
 
-  {$REGION 'FinalizeAllClients'}
 procedure TEngine.FinalizeAllClients;
 var
   I: Int32;
@@ -1694,9 +1632,7 @@ begin
       Clients.Delete(I);
     end;
 end;
-  {$ENDREGION}
 
-  {$REGION 'FinalizeAllSocks5Handlers'}
 procedure TEngine.FinalizeAllSocks5Handlers;
 var
   I: Int;
@@ -1717,9 +1653,7 @@ begin
       Associated.Delete(I);
     end;
 end;
-  {$ENDREGION}
 
-  {$REGION 'FormShow'}
 procedure TEngine.FormShow(Sender: TObject);
 begin
   if FileExists('names.txt') then
@@ -1773,9 +1707,7 @@ begin
 
   ChartTrafficPanel.BringToFront;
 end;
-  {$ENDREGION}
 
-  {$REGION 'ExecuteCommandForAll'}
 procedure TEngine.ExecuteCommandForAll(Data: AnsiString);
 var
   I: Int32;
@@ -1783,9 +1715,7 @@ begin
   for I := 0 to Clients.Count - 1 do
     Clients[I].ExecuteCommand(Data);
 end;
-  {$ENDREGION}
 
-  {$REGION 'Popup'}
 procedure TEngine.PopupMenu1Popup(Sender: TObject);
 begin
   if EClients.ItemIndex = -1 then
@@ -1809,8 +1739,6 @@ procedure TEngine.kill1Click(Sender: TObject);
 begin
   Clients[EClients.ItemIndex].ExecuteCommand('kill');
 end;
-  {$ENDREGION}
-{$ENDREGION}
 
 end.
 

@@ -18,7 +18,7 @@ const
   CVAR_USERINFO = 1 shl 3; // custom flag for all userinfos
 
 const
-  S_CVAR_UNKNOWN_CVAR = 'Unknown cvar "' + S_STRING + '".';
+  S_CVAR_UNKNOWN_CVAR = 'Unknown cvar "%s".';
 
 type
   TCVarType = (V_BOOL, V_INT, V_FLOAT, V_STR);

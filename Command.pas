@@ -16,19 +16,18 @@ const
   CMD_ONLY_IN_GAME = 1 shl 3; // cmd must be executed only in game
 
 const
-  S_CMD_UNKNOWN_COMMAND = 'Unknown command "' + S_STRING + '".';
   S_CMD_EMPTY_COMMAND = 'Empty command.';
 
-  S_CMD_USAGE = 'Syntax: ' + S_STRING + ' <' + S_STRING + '>';
-  S_CMD_USAGE2 = S_CMD_USAGE + ' <' + S_STRING + '>';
-  S_CMD_USAGE3 = S_CMD_USAGE2 + ' <' + S_STRING + '>';
+  S_CMD_USAGE = 'Syntax: ' + '%s' + ' <%s>';
+  S_CMD_USAGE2 = S_CMD_USAGE + ' <%s>';
+  S_CMD_USAGE3 = S_CMD_USAGE2 + ' <%s>';
 
-  S_CMD_CANNOT_CONNECTED = 'Can''t ' + S_STRING + ', not connected';
+  S_CMD_CANNOT_CONNECTED = 'Can''t %s, not connected';
 
-  S_CMD_SENDVALUE = S_STRING + SS + '=' + SS + '"' + S_STRING + '".' + sLineBreak;
-  S_CMD_ACCEPTED = 'Accepted : ' + S_STRING + ' = "' + S_STRING + '".' + sLineBreak;
-  S_CMD_MUST_BE_BOOLEAN = 'Incorrect Parameter: "' + S_STRING + '". ' + #$0A + 'Parameter must be in <0..1>.' + sLineBreak;
-  S_CMD_MUST_BE_INTEGER = 'Incorrect Parameter: "' + S_STRING + '". ' + #$0A + 'Parameter must be numerical.' + sLineBreak;
+  S_CMD_SENDVALUE = '%s = "%s".' + sLineBreak;
+  S_CMD_ACCEPTED = 'Accepted : %s = "%s".' + sLineBreak;
+  S_CMD_MUST_BE_BOOLEAN = 'Incorrect Parameter: "%s". ' + #$0A + 'Parameter must be in <0..1>.' + sLineBreak;
+  S_CMD_MUST_BE_INTEGER = 'Incorrect Parameter: "%s". ' + #$0A + 'Parameter must be numerical.' + sLineBreak;
 
 type
   PCommand = ^TCommand;
