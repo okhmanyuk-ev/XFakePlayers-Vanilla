@@ -190,7 +190,6 @@ type
     CL_RejectionTimeout,
     CL_Connection_Attempts: Int32;
 
-    NET_ShowDrop,
     CL_AllowRedirects: Boolean;
     CL_UserCMD_Count: UInt32;
 
@@ -796,18 +795,7 @@ begin
     Acknowledgement := Acknowledgement and $3FFFFFFF;
 
     if Sequence <= IncomingSequence then
-    begin
-      if NET_ShowDrop then
-        if Sequence = IncomingSequence then
-          Debug(T, ['Duplicate packet ', Sequence, ' at ', IncomingSequence, '.'])
-        else
-          Debug(T, ['Out of order packet ', Sequence, ' at ', IncomingSequence, '.']);
-
       Exit(True);
-    end;
-
-    if (Sequence - IncomingSequence - 1 > 0) and NET_ShowDrop then
-      Debug(T, ['Dropped ', Sequence - IncomingSequence - 1, ' packet(s) at ', Sequence, '.']);
 
     IncomingSequence := Sequence;
     IncomingAcknowledgement := Acknowledgement;
@@ -874,7 +862,6 @@ begin
 end;
 
 procedure TXBaseGameClient.CL_ReadFragments;
-const T = 'CL_ReadFragments';
 var
   I: Int32;
   Ready: array[1..2] of Boolean;
@@ -923,8 +910,6 @@ begin
         Downloaded := Sequence[I] shr 16;
         Total := Sequence[I] and $FFFF;
 
-        Debug(T, ['Index: ', Index, ' (', Downloaded, '/', Total, '), Offset: ', Offset[I], ', Size: ', Size[I]]);
-
         case I of
           1: FragmentsReader.Add(Index, Downloaded, Total, MSG.ReadLStr(Size[I]));
           2:
@@ -961,7 +946,6 @@ begin
 end;
 
 procedure TXBaseGameClient.CL_CompleteFragments;
-const T = 'CL_CompleteFragments';
 var
   I, Size: Int32;
   FileName, FileData: LStr;
@@ -974,8 +958,6 @@ begin
     MSG.Clear;
     MSG.Write(FragmentsReader[I].Defragmentate);
     MSG.Start;
-
-    Debug(T, ['Index: ', FragmentsReader[I].Index, ', Size: ', MSG.Size]);
 
     FragmentsReader.Delete(I);
 
@@ -999,8 +981,6 @@ begin
     MSG.Write(FileFragmentsReader[I].Defragmentate);
     MSG.Start;
 
-    Debug(T, ['Index: ', FileFragmentsReader[I].Index, ', Size: ', MSG.Size]);
-
     FileFragmentsReader.Delete(I);
 
     FileName := MSG.ReadLStr;
@@ -1008,25 +988,16 @@ begin
     Size := MSG.ReadInt32;
 
     if MSG.Position >= MSG.Size then
-    begin
-      Error(T, ['bad file data']);
       Break;
-    end;
 
     if not IsSafeFilePath(FileName) then
-    begin
-      Error(T, ['bad file name: "', FileName, '"']);
       Break;
-    end;
-
+    
     if FileName[1] <> '!' then  // not MD5 or not decal
     begin
       if FileExists(FileName) then
-      begin
-        Error(T, ['file already exists: "', FileName, '"']);
         Break;
-      end;
-
+    
       if Compressed then
         CL_DecompressPacket;
 
@@ -1311,7 +1282,6 @@ begin
 end;
 
 procedure TXBaseGameClient.CL_CheckFragment(var AFragmentsWriter: TFragmentWriter; var AFragmentChannel: TFragmentChannel; var ABuffer: LStr);
-const Title = 'CL_CheckFragment';
 label
   L0, L1;
 begin
@@ -1339,7 +1309,6 @@ begin
 end;
 
 procedure TXBaseGameClient.CL_WriteFragments(var ABuffer: TBufferEx2; FragBuf, FileFragBuf: LStr);
-const Title = 'CL_WriteFragments';
   procedure _WriteHeader(var Frag: TFragmentChannel; Size, Offset: UInt32);
   begin
     with Frag do
@@ -1368,8 +1337,6 @@ const Title = 'CL_WriteFragments';
           ABuffer.WriteInt16(Offset);
           ABuffer.WriteInt16(Size);
         end;
-
-        Debug(Title, ['Index: ', ((Count shl 16) or (Total and $FFFF)) shl 16, ' (', Count, '/', Total, '), Offset: ', Offset, ', Size: ', Size]);
       end;
     end;
   end;
@@ -1382,7 +1349,6 @@ begin
 end;
 
 procedure TXBaseGameClient.CL_CreateFragments(var ABuffer: TBufferEx2; ASize: UInt32 = DEFAULT_FRAGMENT_SIZE; ACompression: Boolean = DEFAULT_FRAGMENT_COMPRESSION_STATE);
-const T = 'CL_CreateFragments';
 var
   S: LStr;
 begin
@@ -1404,8 +1370,6 @@ begin
   ABuffer.Clear;
 
   FragmentsWriter.CreateNewBuffer(S, ASize);
-
-  Debug(T, ['Size: ', Length(S)]);
 end;
 
 procedure TXBaseGameClient.CL_CreateFragments(ASize: UInt32 = DEFAULT_FRAGMENT_SIZE; ACompression: Boolean = DEFAULT_FRAGMENT_COMPRESSION_STATE);
@@ -1414,7 +1378,6 @@ begin
 end;
 
 procedure TXBaseGameClient.CL_CreateFileFragments(AFileName, AFileData: LStr; ASize: UInt32 = DEFAULT_FRAGMENT_SIZE; ACompression: Boolean = DEFAULT_FRAGMENT_COMPRESSION_STATE);
-const T = 'CL_CreateFileFragments';
 begin
   if IsDemoPlayback then
     Exit;
@@ -1440,12 +1403,9 @@ begin
 
     Free;
   end;
-
-  Debug(T, ['FileName: "', AFileName, '", , Size: ', Length(AFileData)]);
 end;
 
 procedure TXBaseGameClient.CL_CompressPacket(var ABuffer: TBufferEx2);
-const T = 'CL_CompressPacket';
 var
   InBuffer,
   OutBuf: Pointer;
@@ -1456,8 +1416,6 @@ begin
   InSize := ABuffer.Size;
 
   BZCompressBuf(InBuffer, InSize, OutBuf, OutSize);
-
-  Debug(T, [ABuffer.Size, ' -> ', OutSize]);
 
   ABuffer.Clear;
   ABuffer.Write(OutBuf^, OutSize);
@@ -5149,8 +5107,6 @@ begin
     Add('cl_timeout', @CL_Timeout, 35, 'Client Timeout');
     Add('cl_rejection_timeout', @CL_RejectionTimeout, 2, 'Client Rejection Timeout', CVAR_HIDE or CVAR_PRIVATE);
     Add('cl_connection_attempts', @CL_Connection_Attempts, 3, 'Client Connection Attempts', CVAR_PRIVATE);
-
-    Add('net_showdrop', @NET_ShowDrop, False, 'Show Dropped Packets');
 
     Add('cl_allowredirects', @CL_AllowRedirects, True, 'Client Allow Redirects', CVAR_PRIVATE);
     Add('cl_usercmd_count', @CL_UserCMD_Count, 1, 'UserCMD Multiplier', CVAR_PRIVATE);
