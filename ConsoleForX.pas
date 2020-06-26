@@ -33,7 +33,6 @@ type
 
     // native engine
     procedure OnError(Sender: TObject; Title, Data: LStr);
-    procedure OnDebug(Sender: TObject; Title, Data: LStr);
     procedure OnHint(Sender: TObject; Title, Data: LStr);
     procedure OnPrint(Sender: TObject; Data: LStr);
 
@@ -97,16 +96,6 @@ begin
   Print(GetTime + ' - [');
   Print('ERROR', CON_COLOR_RED_EX);
   Print('] ' + Title + ' : ' + Data);
-  PrintLn;
-end;
-
-procedure TConsoleForX.OnDebug(Sender: TObject; Title, Data: LStr);
-begin
-  Log.Add('[' + Title + '] ' + Data, True, True, False);
-
-  Print(GetTime + ' - [');
-  Print(Title, CON_COLOR_GRAY_EX);
-  Print('] ' + Data);
   PrintLn;
 end;
 

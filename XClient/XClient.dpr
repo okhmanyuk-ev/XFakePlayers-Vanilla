@@ -69,7 +69,6 @@ begin
   Client.OnSlowFrame := OnSlowFrame;
 
   Client.OnError := OnError;
-  Client.OnDebug := OnDebug;
   Client.OnHint := OnHint;
   Client.OnPrint := OnPrint;
 

@@ -933,7 +933,6 @@ begin
 end;
 
 procedure TXExtendedGameClient.CL_ReadERoundTime(Time: Int16);
-const Title = 'CL_ReadERoundTime';
 begin
   inherited;
 
@@ -942,7 +941,6 @@ begin
 end;
 
 procedure TXExtendedGameClient.CL_ReadETextMsg(Data: TTextMsg);
-const Title = 'CL_ReadETextMsg';
 begin
   inherited;
 
@@ -950,7 +948,6 @@ begin
 end;
 
 procedure TXExtendedGameClient.CL_ReadEVGUIMenu(Data: TVGUIMenu);
-const T = 'CL_ReadEVGUIMenu';
 begin
   case Data.Index of
     VGUI_CHOOSE_TEAM:
@@ -973,7 +970,7 @@ begin
             Hint(H_ENGINE, ['joining to secons team']);
           end;
         else
-          Error(T, ['unkown autojointeam value: ', CL_AutoJoinTeam_Value, ', value must be in 0..2, 0 is random']);
+          Error('CL_ReadEVGUIMenu', ['unkown autojointeam value: ', CL_AutoJoinTeam_Value, ', value must be in 0..2, 0 is random']);
         end;
 
         FTryedJoinTeam := True;
@@ -1020,7 +1017,7 @@ begin
               Hint(H_ENGINE, ['joining to class, ', CL_AutoJoinClass_Value]);
             end
             else
-              Error(T, ['unkown autojoinclass value: ', CL_AutoJoinClass_Value, ', value must be in 0..5, 0 is random']);
+              Error('CL_ReadEVGUIMenu', ['unkown autojoinclass value: ', CL_AutoJoinClass_Value, ', value must be in 0..5, 0 is random']);
           end;
 
         Exit;
@@ -1051,7 +1048,6 @@ begin
 end;
 
 procedure TXExtendedGameClient.CL_ExecuteTrigger(ATrigger: LStr);
-const T = 'CL_ExecuteTrigger';
 var
   I: Int32;
 begin
@@ -1059,7 +1055,7 @@ begin
 
   if I = -1 then
   begin
-    Error(T, ['unkown trigger "', ATrigger, '"']);
+    Error('CL_ExecuteTrigger', ['unkown trigger "', ATrigger, '"']);
     Exit;
   end;
 
@@ -1335,7 +1331,6 @@ begin
 end;
 
 procedure TXExtendedGameClient.CL_NavigationTest_F;
-const T = 'CL_NavigationTest_F';
 var
   SR: TSearchRec;
 

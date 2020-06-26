@@ -139,14 +139,12 @@ begin
 end;
 
 procedure TXNativeClient.CL_SendOutOfBandPacket(ADestination: TNETAdr);
-const T = 'CL_SendOutOfBandPacket';
 begin
   if MSG.Overwriting then
     Default.Error(['MSG.Overwriting must be false']);
 
   MSG.Start;
   MSG.WriteInt32(OUTOFBAND_PREFIX);
-  Debug(T, [ShowBytesEx(MSG.ReadLStr(rmEnd))]);
   NET.Send(ADestination, MSG);
 end;
 
@@ -216,12 +214,9 @@ begin
 end;
 
 function TXNativeClient.CL_ConnectionLessPacket;
-const T = 'CL_ConnectionLessPacket';
 label
   L1;
 begin
-  Debug(T, [ShowBytesEx(MSG.PeekLStr(rmEnd))]);
-
   Result := False;
 
   MSG.SavePosition;
@@ -244,7 +239,6 @@ begin
 end;
 
 function TXNativeClient.CL_SplitPacket: Boolean; // if packet completed then true else false
-const T = 'CL_SplitPacket';
 var
   I, Index, Count, Total: Int32;
   Size: Int16; // source
@@ -274,8 +268,6 @@ begin
     end;
   end;
 
-  Debug(T, ['Index: ', Index, ', (', Count, '/', Total, '), Size: ', Length(MSG.PeekLStr(rmEnd))]);
-
   SplitPacket.Add(Index, Count, Total, MSG.ReadLStr(rmEnd));
 
   Result := False;
@@ -286,15 +278,9 @@ begin
   begin
     MSG.Clear;
     MSG.Write(SplitPacket[I].Defragmentate);
-
-    Debug(T, ['Index: ', Index, ', Size: ', MSG.Size]);
-
     SplitPacket.Delete(I);
-
     CL_ReadPacket;
-
     Result := True;
-
     I := SplitPacket.GetCompleted;
   end;
 end;

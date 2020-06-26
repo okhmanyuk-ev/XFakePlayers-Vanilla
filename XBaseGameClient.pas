@@ -39,17 +39,7 @@ type
 
 const
   H_ENGINE = 'Engine';
-  TEMP_ENTITY_LOG_LEVEL = 2;
-  DIRECTOR_LOG_LEVEL = 2;
-  SOUND_LOG_LEVEL = 3;
-  EVENT_LOG_LEVEL = 3;
-  LIGHTSTYLE_LOG_LEVEL = 2;
-  RESOURCELIST_LOG_LEVEL = 3;
-  VOICEDATA_LOG_LEVEL = 2;
-  NEWUSERMSG_LOG_LEVEL = 2;
-  CONSISTENCY_LOG_LEVEL = 2;
-  UPDATEUSERINFO_LOG_LEVEL = 2;
-
+ 
 type
   TXBaseGameClient = class(TXNativeClient)
   strict private
@@ -750,7 +740,6 @@ begin
 end;
 
 function TXBaseGameClient.CL_ReadPacket;
-const T = 'CL_ReadPacket';
 var
   Sequence, Acknowledgement: Int32;
   Reliable, Fragmented, ReliableAcknowledgement, Security: Boolean;
@@ -1019,16 +1008,12 @@ begin
 end;
 
 procedure TXBaseGameClient.CL_DecompressPacket;
-const T = 'CL_DecompressPacket';
 var
   S: LStr;
   OutBuf: Pointer;
   OutSize: Int32;
 begin
   BZDecompressBuf(Pointer(UInt32(MSG.Memory) + MSG.Position), MSG.Size - MSG.Position, 0, OutBuf, OutSize);
-
-  Debug(T, [MSG.Size - MSG.Position, ' -> ', OutSize]);
-
   MSG.Clear;
   MSG.Write(OutBuf^, OutSize);
   MSG.Start;
@@ -1036,7 +1021,6 @@ begin
 end;
 
 procedure TXBaseGameClient.CL_ParseServerMessage;
-const T = 'CL_ParseServerMessage';
 var
   B: UInt8;
 label
@@ -1061,7 +1045,7 @@ begin
   case B of
     SVC_BAD:
     begin
-      Error(T, [ServerEngineMsgs[B].Name]);
+      Error('CL_ParseServerMessage', [ServerEngineMsgs[B].Name]);
       Hint('Last parsed messages', [CL_GetMessagesHistory]);
       CL_FinalizeConnection;
       Exit;
@@ -1125,7 +1109,7 @@ begin
     SVC_SENDCVARVALUE: CL_ParseSendCVarValue;
     SVC_SENDCVARVALUE2: CL_ParseSendCVarValue2;
   else
-    Error(T, [Format('Illegal engine message %d', [B])]);
+    Error('CL_ParseServerMessage', [Format('Illegal engine message %d', [B])]);
     Hint('Last parsed messages', [CL_GetMessagesHistory]);
     CL_FinalizeConnection;
     Exit;
@@ -1135,7 +1119,6 @@ begin
 end;
 
 function TXBaseGameClient.CL_ParseGameEvent(B: UInt8): Boolean;
-const T = 'CL_ParseGameEvent';
 var
   I: Int32;
 begin
@@ -1145,7 +1128,7 @@ begin
 
   if I = -1 then
   begin
-    Error(T, [Format('Illegal game event %d', [B])]);
+    Error('CL_ParseGameEvent', [Format('Illegal game event %d', [B])]);
     Hint('Last parsed messages', [CL_GetMessagesHistory]);
     CL_FinalizeConnection;
     Exit;
@@ -1157,8 +1140,6 @@ begin
     GMSG.Write(MSG.ReadLStr(MSG.ReadUInt8))
   else
     GMSG.Write(MSG.ReadLStr(GameEvents[I].Size));
-
-  Debug(T, [GameEvents[I].Name]);
 
   GMSG.Start;
 
@@ -1506,20 +1487,16 @@ begin
 end;
 
 procedure TXBaseGameClient.CL_ParseDisconnect;
-const T = 'CL_ParseDisconnect';
 var
   Reason: LStr;
 begin
   Reason := ReadLine(MSG.ReadLStr);
-
-  Debug(T, [Reason]);
 
   if State >= CS_CONNECTING then
     CL_FinalizeConnection(Reason);
 end;
 
 procedure TXBaseGameClient.CL_ParseEvent;
-const T = 'CL_ParseEvent';
 var
   I: Int;
   E: TEventInfo;
@@ -1543,32 +1520,24 @@ begin
 
     if MSG.ReadBit then
       E.FireTime := MSG.ReadUBits(16);
-
-    Debug(T, [E.ToString], EVENT_LOG_LEVEL);
   end;
 
   MSG.EndBitReading;
 end;
 
 procedure TXBaseGameClient.CL_ParseVersion;
-const T = 'CL_ParseVersion';
 begin
   ProtocolVersion := MSG.ReadInt32;
-  Debug(T, [ProtocolVersion]);
 end;
 
 procedure TXBaseGameClient.CL_ParseSetView;
-const T = 'CL_ParseSetView';
 var
   Value: Int16;
 begin
   Value := MSG.ReadInt16;
-
-  Debug(T, [Value]);
 end;
 
 procedure TXBaseGameClient.CL_ParseSound;
-const T = 'CL_ParseSound';
 var
   Sound: TSound;
 begin
@@ -1603,9 +1572,6 @@ begin
   end;
 
   MSG.EndBitReading;
-
-  Debug(T, [Sound.ToString], SOUND_LOG_LEVEL);
-
   CL_PlaySound(Sound);
 end;
 
@@ -1615,28 +1581,22 @@ begin
 end;
 
 procedure TXBaseGameClient.CL_ParseStuffText;
-const T = 'CL_ParseStuffText';
 var
   S: LStr;
 begin
   S := Trim(MSG.ReadLStr);
-  Debug(T, [S]);
   ReleaseEvent(OnServerCommand, S);
   CMD_ExecuteConsoleCommand(S);
 end;
 
 procedure TXBaseGameClient.CL_ParseSetAngle;
-const T = 'CL_ParseSetAngle';
 begin
   ViewAngles.X := MSG.ReadHiResAngle;
   ViewAngles.Y := MSG.ReadHiResAngle;
   ViewAngles.Z := MSG.ReadHiResAngle;
-
-  Debug(T, [ViewAngles.ToString]);
 end;
 
 procedure TXBaseGameClient.CL_ParseServerInfo;
-const T = 'CL_ParseServerInfo';
 begin
   with ServerInfo do
   begin
@@ -1661,16 +1621,6 @@ begin
 
     MSG.ReadUInt8;
 
-    Debug(T, ['Protocol: ', Protocol]);
-    Debug(T, ['SpawnCount: ', SpawnCount]);
-    Debug(T, ['MapCheckSum: ', MapCheckSum]);
-    Debug(T, ['MaxPlayers: ', MaxPlayers]);
-    Debug(T, ['Index: ', Index]);
-    Debug(T, ['GameDir: ', GameDir]);
-    Debug(T, ['HostName: ', Name]);
-    Debug(T, ['Map: ', Map]);
-//    Debug(T, ['MapList: ', MapList]);
-
     if not (Protocol in [46..48]) then
     begin
       CL_FinalizeConnection(['Server is using unsupported protocol version: ', Protocol]);
@@ -1683,7 +1633,6 @@ begin
 end;
 
 procedure TXBaseGameClient.CL_ParseLightStyle;
-const T = 'CL_ParseLightStyle';
 var
   AIndex: UInt8;
 begin
@@ -1693,12 +1642,9 @@ begin
     SetLength(LightStyles, AIndex + 1);
 
   LightStyles[AIndex] := MSG.ReadLStr;
-
-  Debug(T, ['Index: ', AIndex, ', Data: "', LightStyles[AIndex], '"'], LIGHTSTYLE_LOG_LEVEL);
 end;
 
 procedure TXBaseGameClient.CL_ParseUpdateUserInfo;
-const T = 'CL_ParseUpdateUserInfo';
 var
   Index: UInt8;
 begin
@@ -1710,13 +1656,10 @@ begin
       UserID := MSG.ReadInt32;
       UserInfo := MSG.ReadLStr;
       MSG.Read(MD5, SizeOf(MD5));
-
-      Debug(T, ['Index: ', Index, ', UserID: ', UserID, ', Data: "', UserInfo, '"'], UPDATEUSERINFO_LOG_LEVEL);
     end;
 end;
 
 procedure TXBaseGameClient.CL_ParseDeltaDescription;
-const T = 'CL_ParseDeltaDescription';
 var
   Name: LStr;
 begin
@@ -1724,8 +1667,6 @@ begin
   MSG.StartBitReading;
   Delta.Add(MSG, Name, MSG.ReadUBits(16));
   MSG.EndBitReading;
-
-  Debug(T, [Name]);
 end;
 
 procedure TXBaseGameClient.CL_ParseClientData;
@@ -1759,13 +1700,10 @@ begin
 end;
 
 procedure TXBaseGameClient.CL_ParseStopSound;
-const T = 'CL_ParseStopSound';
 var
   Index: Int16;
 begin
   Index := MSG.ReadInt16;
-
-  Debug(T, [Index]);
 end;
 
 procedure TXBaseGameClient.CL_ParsePings;
@@ -1783,7 +1721,6 @@ begin
 end;
 
 procedure TXBaseGameClient.CL_ParseParticle;
-const T = 'CL_ParseParticle';
 var
   Particle: TParticle;
 begin
@@ -1797,17 +1734,10 @@ begin
 
     Count := MSG.ReadUInt8;
     Color := MSG.ReadUInt8;
-
-    Debug(T, [
-      'Origin: [', Origin.ToString, '], ',
-      'Direction: [', Direction.ToString, '], ',
-      'Count: ', Count, ', ',
-      'Color: ', Color]);
   end;
 end;
 
 procedure TXBaseGameClient.CL_ParseSpawnStatic;
-const T = 'CL_ParseSpawnStatic';
 var
   Index: Int16;
   Entity: TEntity;
@@ -1840,21 +1770,10 @@ begin
       MSG.Read(RenderColor, SizeOf(RenderColor));
       RenderFX := MSG.ReadUInt8;
     end;
-
-    Debug(T, [
-      'Index: ', Index, ', ',
-      'Origin: [', Origin.ToString, '], ',
-      'Angles: [', Angles.ToString, '], ',
-      'Sequence: ', Sequence, ', ',
-      'Frame: ', Frame, ', ',
-      'ColorMap: ', ColorMap, ', ',
-      'Skin: ', Skin, ', ',
-      'RenderMode: ', RenderMode]);
   end;
 end;
 
 procedure TXBaseGameClient.CL_ParseEventReliable;
-const T = 'CL_ParseEventReliable';
 var
   E: TEventInfo;
 begin
@@ -1873,11 +1792,6 @@ begin
     E.FireTime := MSG.ReadUBits(16);
 
   MSG.EndBitReading;
-
-  Debug(T, [
-    'Index: ', E.Index, ', ',
-    'FireTime: ', E.FireTime, ', ',
-    E.Args.ToString], EVENT_LOG_LEVEL);
 end;
 
 procedure TXBaseGameClient.CL_ParseSpawnBaseline;
@@ -1925,13 +1839,10 @@ begin
 end;
 
 procedure TXBaseGameClient.CL_ParseTempEntity;
-const T = 'CL_ParseTempEntity';
 var
   Index: UInt8;
 begin
   Index := MSG.ReadUInt8;
-
-  Debug(T, [TempEntityMsgs[Index].Name]);
 
   CL_AddMessageToHistory('TE' + TempEntityMsgs[Index].Name);
 
@@ -1999,15 +1910,11 @@ begin
 end;
 
 procedure TXBaseGameClient.CL_ParseSetPause;
-const T = 'CL_ParseSetPause';
 begin
   Paused := MSG.ReadBool8;
-
-  Debug(T, [Paused]);
 end;
 
 procedure TXBaseGameClient.CL_ParseSignonNum;
-const T = 'CL_ParseSignonNum';
 var
   Index: UInt8;
 begin
@@ -2015,7 +1922,7 @@ begin
 
   if Index < SignonNum then
   begin
-    Error(T, ['received signon ', Index, ' when at ', SignonNum]);
+    Error('CL_ParseSignonNum', ['received signon ', Index, ' when at ', SignonNum]);
     CL_FinalizeConnection;
     Exit;
   end;
@@ -2026,19 +1933,14 @@ begin
 end;
 
 procedure TXBaseGameClient.CL_ParseCenterPrint;
-const T = 'CL_ParseCenterPrint';
 var
   Data: LStr;
 begin
   Data := MSG.ReadLStr;
-
-  Debug(T, ['"', Data, '"']);
-
   ReleaseEvent(OnCenterPrint, Data);
 end;
 
 procedure TXBaseGameClient.CL_ParseSpawnStaticSound;
-const T = 'CL_ParseSpawnStaticSound';
 var
   Sound: TSound;
   Unk1: UInt8;
@@ -2090,55 +1992,40 @@ Name: 	 SVC_SPAWNSTATICSOUND
 
   Unk1 := MSG.ReadUInt8;
 
-  Debug(T, [Sound.ToString, ', ', 'Unk1: ', Unk1]);
 end;
 
 procedure TXBaseGameClient.CL_ParseIntermission;
-const T = 'CL_ParseIntermission';
 begin
-  Debug(T, ['this']);
-
   Intermission := 1;
 end;
 
 procedure TXBaseGameClient.CL_ParseFinale;
-const T = 'CL_ParseFinale';
 var
   Data: LStr;
 begin
   Data := MSG.ReadLStr;
-
-  Debug(T, [Data]);
-
   Intermission := 2;
 end;
 
 procedure TXBaseGameClient.CL_ParseCDTrack;
-const T = 'CL_ParseCDTrack';
 var
   Index, Loop: UInt8;
 begin
   Index := MSG.ReadUInt8;
   Loop := MSG.ReadUInt8;
-
-  Debug(T, ['Index: ', Index, ', Loop: ', Loop]);
 end;
 
 procedure TXBaseGameClient.CL_ParseRestore;
-const T = 'CL_ParseRestore';
 var
   v1, Map: LStr;
   I: Int32;
 begin
   v1 := MSG.ReadLStr;  //directory?
-  Debug(T, [v1]);
-
   for I := 0 to MSG.ReadUInt8 - 1 do
     Map := MSG.ReadLStr;
 end;
 
 procedure TXBaseGameClient.CL_ParseCutScene;
-const T = 'CL_ParseCutScene';
 var
   Data: LStr;
 begin
@@ -2151,14 +2038,10 @@ Note: This text will keep showing on clients in future intermissions.  Name: 	 S
   LStr 	 Text}
 
   Data := MSG.ReadLStr;
-
-  Debug(T, [Data]);
-
   Intermission := 3;
 end;
 
 procedure TXBaseGameClient.CL_ParseWeaponAnim;
-const T = 'CL_ParseWeaponAnim';
 var
   Sequence, Group: UInt8;
 begin
@@ -2171,12 +2054,9 @@ begin
 
   Sequence := MSG.ReadUInt8;
   Group := MSG.ReadUInt8;
-
-  Debug(T, ['Sequence: ', Sequence, ', Group: ', Group]);
 end;
 
 procedure TXBaseGameClient.CL_ParseDecalName;
-const T = 'CL_ParseDecalName';
 var
   Index: UInt8;
   Decal: LStr;
@@ -2195,12 +2075,9 @@ begin
 
   Index := MSG.ReadUInt8;
   Decal := MSG.ReadLStr;
-
-  Debug(T, ['Index: ', Index, ', Decal: "', Decal, '"']);
 end;
 
 procedure TXBaseGameClient.CL_ParseRoomType;
-const T = 'CL_ParseRoomType';
 var
   Index: Int16;
 begin
@@ -2241,8 +2118,6 @@ begin
   short 	 Value}
   
   Index := MSG.ReadInt16;
-
-  Debug(T, [Index]);
 end;
 
 procedure TXBaseGameClient.CL_ParseAddAngle;
@@ -2255,7 +2130,6 @@ begin
 end;
 
 procedure TXBaseGameClient.CL_ParseNewUserMsg;
-const T = 'CL_ParseNewUserMsg';
 var
   Index, Size: UInt8;
   Name: LStr;
@@ -2263,14 +2137,10 @@ begin
   Index := MSG.ReadUInt8;
   Size := MSG.ReadUInt8;
   Name := ReadString(MSG.ReadLStr(16)); // FIX
-
-  Debug(T, ['Index: ', Index, ', Size: ', Size, ', Name: "', Name, '"'], NEWUSERMSG_LOG_LEVEL);
-
   GameEvents.Add(Index, Size, Name);
 end;
 
 procedure TXBaseGameClient.CL_ParsePacketEntities(IsDelta: Boolean);
-const T = 'CL_ParsePacketEntities';
 var
   Mask: UInt8;
   Index, LastLength: Int32;
@@ -2353,20 +2223,15 @@ begin
   end;
 
   MSG.ReadUBits(16); // must be 0
-
   MSG.EndBitReading;
-
-  if LengthChanged then
-    Debug(T, [(Length(Entities) - LastLength), ' new entities allocated, total ', Length(Entities)]);
 end;
 
 procedure TXBaseGameClient.CL_ParseChoke;
 begin
-  Debug('CL_ParseChoke', ['this']);  // FIX
+  // nothing
 end;
 
 procedure TXBaseGameClient.CL_ParseResourceList;
-const T = 'CL_ParseResourceList';
 var
   I: Int32;
   R: TResource;
@@ -2409,9 +2274,6 @@ begin
 
   MSG.EndBitReading;
 
-  for I := Low(Resources) to  High(Resources) do
-    Debug(T, [Resources[I].ToString], RESOURCELIST_LOG_LEVEL);
-
   Print([Length(Resources), ' resources received']);
 
   State := CS_VERIFYING_RESOURCES;
@@ -2420,7 +2282,6 @@ begin
 end;
 
 procedure TXBaseGameClient.CL_ParseNewMoveVars;
-const T = 'CL_ParseNewMoveVars';
 begin
   with MoveVars do
   begin
@@ -2448,36 +2309,10 @@ begin
     SkyColorB := MSG.ReadFloat;
     SkyVec := MSG.ReadVec3F;
     SkyName := MSG.ReadLStr;
-
-
-    Debug(T, [
-      'Gravity: ', Gravity, ', ',
-      'StopSpeed: ', StopSpeed, ', ',
-      'MaxSpeed: ', MaxSpeed, ', ',
-      'SpectatorMaxSpeed: ', SpectatorMaxSpeed, ', ',
-      'Accelerate: ', Accelerate, ', ',
-      'AirAccelerate: ', AirAccelerate, ', ',
-      'WaterAccelerate: ', WaterAccelerate, ', ',
-      'Friction: ', Friction, ', ',
-      'EdgeFriction: ', EdgeFriction, ', ',
-      'WaterFriction: ', WaterFriction, ', ',
-      'EntGravity: ', EntGravity, ', ',
-      'Bounce: ', Bounce, ', ',
-      'StepSize: ', StepSize, ', ',
-      'MaxVelocity: ', MaxVelocity, ', ',
-      'ZMax: ', ZMax, ', ',
-      'WaveHeight: ', WaveHeight, ', ',
-      'FootSteps: ', FootSteps, ', ',
-      'RollAngle: ', RollAngle, ', ',
-      'RollSpeed: ', RollSpeed, ', ',
-      'SkyColor: [R: ', SkyColorR, ', G: ', SkyColorG, ', B: ', SkyColorB, '], ',
-      'SkyVec: [', SkyVec.ToString, '], ',
-      'SkyName: "', SkyName, '"']);
   end;
 end;
 
 procedure TXBaseGameClient.CL_ParseResourceRequest;
-const T = 'CL_ParseResourceRequest';
 var
   I, ServerNum, Range: Int32;
   S: LStr;
@@ -2494,14 +2329,13 @@ begin
       CL_CreateFragments(DEFAULT_FRAGMENT_SIZE, False);
     end
     else
-      Error(T, ['Custom resource list request out of range (', Range, ')']);
+      Error('CL_ParseResourceRequest', ['Custom resource list request out of range (', Range, ')']);
   end
   else
-    Error(T, ['Index (', ServerNum, ') <> SpawnCount (', ServerInfo.SpawnCount, ')']);
+    Error('CL_ParseResourceRequest', ['Index (', ServerNum, ') <> SpawnCount (', ServerInfo.SpawnCount, ')']);
 end;
 
 procedure TXBaseGameClient.CL_ParseCustomization;
-const T = 'CL_ParseCustomization';
 var
   Index: UInt8;
   Resource: TResource;
@@ -2519,12 +2353,9 @@ begin
     if Flags and RES_CUSTOM > 0 then
       MSG.Read(MD5, SizeOf(MD5));
   end;
-
-  Debug(T, [Resource.ToString]);
 end;
 
 procedure TXBaseGameClient.CL_ParseCrosshairAngle;
-const T = 'CL_ParseCrosshairAngle';
 var
   Pitch, Yaw: UInt8;
 begin
@@ -2543,12 +2374,9 @@ begin
 
   Pitch := MSG.ReadUInt8;
   Yaw := MSG.ReadUInt8;
-
-  Debug(T, ['Pitch: ', Pitch, ', Yaw: ', Yaw]);
 end;
 
 procedure TXBaseGameClient.CL_ParseSoundFade;
-const T = 'CL_ParseSoundFade';
 var
   InitialPercent,
   HoldTime,
@@ -2567,17 +2395,11 @@ begin
     byte  HoldTime
     byte  FadeInTime
     byte  FadeOutTime}
-  
+
   InitialPercent := MSG.ReadUInt8;
   HoldTime := MSG.ReadUInt8;
   FadeInTime := MSG.ReadUInt8;
   FadeOutTime := MSG.ReadUInt8;
-
-  Debug(T, [
-    'InitialPercent: ', InitialPercent, ', ',
-    'HoldTime: ', HoldTime, ', ',
-    'FadeInTime: ', FadeInTime, ', ',
-    'FadeOutTime: ', FadeOutTime]);
 end;
 
 procedure TXBaseGameClient.CL_ParseFileTxferFailed;
@@ -2595,7 +2417,6 @@ begin
 end;
 
 procedure TXBaseGameClient.CL_ParseHLTV;
-const T = 'CL_ParseHLTV';
 var
   Mode: UInt8;
 begin
@@ -2621,12 +2442,9 @@ begin
       MSG.Skip(8);
     end
   end;
-
-  Debug(T, [Mode]);
 end;
 
 procedure TXBaseGameClient.CL_ParseDirector;
-const T = 'CL_ParseDirector';
 var
   S: LStr;
   Index: UInt8;
@@ -2639,13 +2457,11 @@ begin
 
   if not (Index in [DRC_CMD_FIRST..DRC_CMD_LAST]) then
   begin
-    Error(T, [Format('Illegal Director Command %d', [Index])]);
+    Error('CL_ParseDirector', [Format('Illegal Director Command %d', [Index])]);
     Hint('Last parsed messages', [CL_GetMessagesHistory]);
     CL_FinalizeConnection;
     Exit;
   end;
-
-  Debug(T, ['Index: ', Index, ', Name: "', DrcCmdMessages[Index].Name + '"']);
 
   case Index of
     DRC_CMD_NONE: ;
@@ -2668,21 +2484,14 @@ begin
 end;
 
 procedure TXBaseGameClient.CL_ParseVoiceInit;
-const T = 'CL_ParseVoiceInit';
 begin
   VoiceCodec := MSG.ReadLStr;
 
   if ServerInfo.Protocol > 46 then
-  begin
     VoiceQuality := MSG.ReadUInt8;
-    Debug(T, ['Codec: "', VoiceCodec, '", Quality: ', VoiceQuality]);
-  end
-  else
-    Debug(T, ['Codec: "', VoiceCodec, '"']);
 end;
 
 procedure TXBaseGameClient.CL_ParseVoiceData;
-const T = 'CL_ParseVoiceData';
 var
   ClientIndex, Size: Int32;
 begin
@@ -2694,40 +2503,29 @@ begin
     Size := 8192;
 
   MSG.Skip(Size);
-
-  Debug(T, ['Size: ', Size], VOICEDATA_LOG_LEVEL);
 end;
 
 procedure TXBaseGameClient.CL_ParseSendExtraInfo;
-const T = 'CL_ParseSendExtraInfo';
 begin
   with ExtraInfo do
   begin
     FallbackDir := MSG.ReadLStr;
     AllowCheats := MSG.ReadBool8;
-
-    Debug(T, ['FallbackDir: "', FallbackDir, '", AllowCheats: ', AllowCheats]);
   end;
 end;
 
 procedure TXBaseGameClient.CL_ParseTimeScale;
-const T = 'CL_ParseTimeScale';
 begin
   TimeScale := MSG.ReadFloat;
-
-  Debug(T, [TimeScale]);
 end;
 
 procedure TXBaseGameClient.CL_ParseResourceLocation;
-const T = 'CL_ParseResourceLocation';
 begin
   ResourceLocation := MSG.ReadLStr;
-
-  Debug(T, [ResourceLocation]);
 end;
 
 procedure TXBaseGameClient.CL_ParseSendCVarValue;
-const T = 'CL_ParseSendCVarValue';
+const
   BadCVarRequest = 'Bad CVAR request';
 var
   CVar, Response: LStr;
@@ -2767,13 +2565,11 @@ begin
   if (Response = BadCVarRequest) and (C = -1) then
     Hint(H_ENGINE, ['QCC bad request for: "', CVar, '"']);
 
-  Debug(T, ['CVar: "', CVar, '"']);
-
   CL_WriteCVarValue(Response);
 end;
 
 procedure TXBaseGameClient.CL_ParseSendCVarValue2;
-const T = 'CL_ParseSendCVarValue2';
+const
   BadCVarRequest = 'Bad CVAR request';
 var
   Index: Int32;
@@ -2813,13 +2609,10 @@ begin
   if (Response = BadCVarRequest) and (C = -1) then
     Hint(H_ENGINE, ['QCC2 bad request for: "', CVar, '"']);
 
-  Debug(T, ['Index: ', Index, ', CVar: "', CVar, '"']);
-
   CL_WriteCVarValue2(Index, CVar, Response);
 end;
 
 procedure TXBaseGameClient.CL_ParseTEBeamPoints;
-const T = 'CL_ParseTEBeamPoints';
 var
   Vec1, Vec2: TVec3F;
   SpriteIndex: Int16;
@@ -2859,7 +2652,6 @@ begin
 end;
 
 procedure TXBaseGameClient.CL_ParseTEBeamEntPoint;
-const T = 'CL_ParseTEBeamEntPoint';
 var
   StartEntity: Int16;
   Vec2: TVec3F;
@@ -2882,17 +2674,13 @@ begin
 end;
 
 procedure TXBaseGameClient.CL_ParseTEGunShot;
-const T = 'CL_ParseTEGunShot';
 var
   Position: TVec3F;
 begin
   Position := MSG.ReadCoord3;
-
-  Debug(T, ['Position: [', Position.ToString, ']'], TEMP_ENTITY_LOG_LEVEL);
 end;
 
 procedure TXBaseGameClient.CL_ParseTEExplosion;
-const T = 'CL_ParseTEExplosion';
 var
   Position: TVec3F;
   SpriteIndex: Int16;
@@ -2912,27 +2700,16 @@ begin
   Scale := MSG.ReadUInt8;
   FrameRate := MSG.ReadUInt8;
   Flags := MSG.ReadUInt8;
-
-  Debug(T, [
-    'Position: [', Position.ToString, '], ',
-    'SpriteIndex: ', SpriteIndex, ', ',
-    'Scale: ', Scale, ', ',
-    'FrameRate: ', FrameRate, ', ',
-    'Flags: ', Flags], TEMP_ENTITY_LOG_LEVEL);
 end;
 
 procedure TXBaseGameClient.CL_ParseTETarExplosion;
-const T = 'CL_ParseTETarExplosion';
 var
   Position: TVec3F;
 begin
   Position := MSG.ReadCoord3;
-
-  Debug(T, ['Position: [', Position.ToString, ']'], TEMP_ENTITY_LOG_LEVEL);
 end;
 
 procedure TXBaseGameClient.CL_ParseTESmoke;
-const T = 'CL_ParseTESmoke';
 var
   Position: TVec3F;
   SpriteIndex: Int16;
@@ -2942,23 +2719,15 @@ begin
   SpriteIndex := MSG.ReadInt16;
   Scale := MSG.ReadUInt8;
   FrameRate := MSG.ReadUInt8;
-
-  Debug(T, [
-    'Position: [', Position.ToString, '], ',
-    'SpriteIndex: ', SpriteIndex, ', ',
-    'Scale: ', Scale, ', ',
-    'FrameRate: ', FrameRate], TEMP_ENTITY_LOG_LEVEL);
 end;
 
 procedure TXBaseGameClient.CL_ParseTETracer;
-const T = 'CL_ParseTETracer';
 begin
   MSG.ReadCoord3;
   MSG.ReadCoord3;
 end;
 
 procedure TXBaseGameClient.CL_ParseTELightning;
-const T = 'CL_ParseTELightning';
 begin
   MSG.ReadCoord3;
   MSG.ReadCoord3;
@@ -2969,7 +2738,6 @@ begin
 end;
 
 procedure TXBaseGameClient.CL_ParseTEBeamEnts;
-const T = 'CL_ParseTEBeamEnts';
 begin
   MSG.ReadInt16; //start ent
   MSG.ReadInt16; //end ent
@@ -2987,37 +2755,27 @@ begin
 end;
 
 procedure TXBaseGameClient.CL_ParseTESparks;
-const T = 'CL_ParseTESparks';
 var
   Position: TVec3F;
 begin
   Position := MSG.ReadCoord3;
-
-  Debug(T, ['Position: [', Position.ToString, ']'], TEMP_ENTITY_LOG_LEVEL);
 end;
 
 procedure TXBaseGameClient.CL_ParseTELavaSplash;
-const T = 'CL_ParseTELavaSplash';
 var
   Position: TVec3F;
 begin
   Position := MSG.ReadCoord3;
-
-  Debug(T, ['Position: [', Position.ToString, ']', TEMP_ENTITY_LOG_LEVEL]);
 end;
 
 procedure TXBaseGameClient.CL_ParseTETeleport;
-const T = 'CL_ParseTETeleport';
 var
   Position: TVec3F;
 begin
   Position := MSG.ReadCoord3;
-
-  Debug(T, ['Position: [', Position.ToString, ']'], TEMP_ENTITY_LOG_LEVEL);
 end;
 
 procedure TXBaseGameClient.CL_ParseTEExplosion2;
-const T = 'CL_ParseTEExplosion2';
 var
   Position: TVec3F;
   StartColor, NumColors: UInt8;
@@ -3025,15 +2783,9 @@ begin
   Position := MSG.ReadCoord3;
   StartColor := MSG.ReadUInt8;
   NumColors := MSG.ReadUInt8;
-
-  Debug(T, [
-    'Position: [', Position.ToString, '], ',
-    'StartColor: ', StartColor, ', ',
-    'NumColors: ', NumColors], TEMP_ENTITY_LOG_LEVEL);
 end;
 
 procedure TXBaseGameClient.CL_ParseTEBSPDecal;
-const T = 'CL_ParseTEBSPDecal';
 var
   Position: TVec3F;
   TextureIndex, EntityIndex, ModelIndex: Int16;
@@ -3046,16 +2798,9 @@ begin
 
   if EntityIndex > 0 then
     ModelIndex := MSG.ReadInt16;
-
-  Debug(T, [
-    'Position: [', Position.ToString, '], ',
-    'TextureIndex: ', TextureIndex, ', ',
-    'EntityIndex: ', EntityIndex, ', ',
-    'ModelIndex: ', ModelIndex], TEMP_ENTITY_LOG_LEVEL);
 end;
 
 procedure TXBaseGameClient.CL_ParseTEImplosion;
-const T = 'CL_ParseTEImplosion';
 var
   Position: TVec3F;
   Radius, Count, Life: UInt8;
@@ -3064,16 +2809,9 @@ begin
   Radius := MSG.ReadUInt8;
   Count := MSG.ReadUInt8;
   Life := MSG.ReadUInt8;
-
-  Debug(T, [
-    'Position: [', Position.ToString, '], ',
-    'Radius: ', Radius, ', ',
-    'Count: ', Count, ', ',
-    'Life: ', Life], TEMP_ENTITY_LOG_LEVEL);
 end;
 
 procedure TXBaseGameClient.CL_ParseTESpriteTrail;
-const T = 'CL_ParseTESpriteTrail';
 begin
   MSG.ReadCoord3;
   MSG.ReadCoord3;
@@ -3086,7 +2824,6 @@ begin
 end;
 
 procedure TXBaseGameClient.CL_ParseTESprite;
-const T = 'CL_ParseTESprite';
 var
   Position: TVec3F;
   SpriteIndex: Int16;
@@ -3096,16 +2833,9 @@ begin
   Spriteindex := MSG.ReadInt16;
   Scale := MSG.ReadUInt8;
   Brightness := MSG.ReadUInt8;
-
-  Debug(T, [
-    'Position: [', Position.ToString, '], ',
-    'SpriteIndex: ', SpriteIndex, ', ',
-    'Scale: ', Scale, ', ',
-    'Brightness: ', Brightness], TEMP_ENTITY_LOG_LEVEL);
 end;
 
 procedure TXBaseGameClient.CL_ParseTEBeamSprite;
-const T = 'CL_ParseTEBeamSprite';
 var
   StartPos, EndPos: TVec3F;
   BeamSprite, EndSprite: Int16;
@@ -3114,16 +2844,9 @@ begin
   EndPos := MSG.ReadCoord3;
   BeamSprite := MSG.ReadInt16;
   EndSprite := MSG.ReadInt16;
-
-  Debug(T, [
-    'StartPos: [', StartPos.ToString, '], ',
-    'EndPos: [', EndPos.ToString, '], ',
-    'BeamSprite: ', BeamSprite, ', ',
-    'EndSprite: ', EndSprite], TEMP_ENTITY_LOG_LEVEL);
 end;
 
 procedure TXBaseGameClient.CL_ParseTEBeamToRus;
-const T = 'CL_ParseTEBeamToRus';
 var
   Origin, Axis: TVec3F;
   Sprite: Int16;
@@ -3147,22 +2870,9 @@ begin
   Noise := MSG.ReadUInt8;
   MSG.Read(Color, SizeOf(Color));
   ScrollSpeed := MSG.ReadUInt8;
-
-  Debug(T, [
-    'Origin: [', Origin.ToString, '], ',
-    'Axis: [', Axis.ToString, '], ',
-    'Sprite: ', Sprite, ', ',
-    'StartFrame: ', StartFrame, ', ',
-    'FrameRate: ', FrameRate, ', ',
-    'Life: ', Life, ', ',
-    'Width: ', Width, ', ',
-    'Noise: ', Noise, ', ',
-    'Color: [', Color.ToString, '], ',
-    'ScrollSpeed: ', ScrollSpeed], TEMP_ENTITY_LOG_LEVEL);
 end;
 
 procedure TXBaseGameClient.CL_ParseTEBeamDisc;
-const T = 'CL_ParseTEBeamDisc';
 begin
   MSG.ReadCoord3;
   MSG.ReadCoord3;
@@ -3180,7 +2890,6 @@ begin
 end;
 
 procedure TXBaseGameClient.CL_ParseTEBeamCylinder;
-const T = 'CL_ParseTEBeamCylinder';
 begin
   MSG.ReadCoord3;
   MSG.ReadCoord3;
@@ -3199,7 +2908,6 @@ begin
 end;
 
 procedure TXBaseGameClient.CL_ParseTEBeamFollow;
-const T = 'CL_ParseTEBeamFollow';
 var
   Entity, Sprite: Int16;
   Color: TRGB;
@@ -3211,18 +2919,9 @@ begin
   LineWidth := MSG.ReadUInt8;
   MSG.Read(Color, SizeOf(Color));
   Brightness := MSG.ReadUInt8;
-
-  Debug(T, [
-    'Entity: ', Entity, ', ',
-    'Sprite: ', Sprite, ', ',
-    'Life: ', Life, ', ',
-    'LineWidth: ', LineWidth, ', ',
-    'Color [', Color.ToString, '], ',
-    'Brightness: ', Brightness], TEMP_ENTITY_LOG_LEVEL);
 end;
 
 procedure TXBaseGameClient.CL_ParseTEGlowSprite;
-const T = 'CL_ParseTEGlowSprite';
 begin
   MSG.ReadCoord3;
   MSG.ReadInt16;
@@ -3232,7 +2931,6 @@ begin
 end;
 
 procedure TXBaseGameClient.CL_ParseTEBeamRing;
-const T = 'CL_ParseTEBeamRing';
 begin
   MSG.ReadInt16;
   MSG.ReadInt16;
@@ -3250,7 +2948,6 @@ begin
 end;
 
 procedure TXBaseGameClient.CL_ParseTEStreakSplash;
-const T = 'CL_ParseTEStreakSplash';
 begin
   MSG.ReadCoord3;
   MSG.ReadCoord3;
@@ -3261,7 +2958,6 @@ begin
 end;
 
 procedure TXBaseGameClient.CL_ParseTEDLight;
-const T = 'CL_ParseTEDLight';
 var
   Position: TVec3F;
   Radius, Life, DecayRate: UInt8;
@@ -3285,17 +2981,9 @@ begin
 //  Brightness := MSG.ReadUInt8;
   Life := MSG.ReadUInt8;
   DecayRate := MSG.ReadUInt8;
-
-  Debug(T, [
-    'Position: [', Position.ToString, '], ',
-    'Radius: ', Radius, ', ',
-    'Color: [', Color.ToString, '], ',
-    'Life: ', Life, ', ',
-    'DecayRate: ', DecayRate], TEMP_ENTITY_LOG_LEVEL);
 end;
 
 procedure TXBaseGameClient.CL_ParseTEELight;
-const T = 'CL_ParseTEELight';
 begin
   MSG.ReadInt16;
   MSG.ReadCoord3;
@@ -3308,7 +2996,6 @@ begin
 end;
 
 procedure TXBaseGameClient.CL_ParseTETextMessage;
-const T = 'CL_ParseTETextMessage';
 var
   Chan, Effect: UInt8;
   Position: TVec2F;
@@ -3351,21 +3038,9 @@ begin
     FxTime := MSG.ReadInt16;
 
   Data := MSG.ReadLStr;
-
-  Debug(T, [
-    'Channel: ', Chan, ', ',
-    'Position: [', Position.ToString, '], ',
-    'Effect: ', Effect, ', ',
-    'TextColor: [', TextColor.ToString, '], ',
-    'EffectColor: [', EffectColor.ToString, '], ',
-    'FadeInTime: ', FadeInTime, ', ',
-    'FadeOutTime: ', FadeOutTime, ', ',
-    'HoldTime: ', HoldTime, ', ',
-    'Data: "', Data, '"'], TEMP_ENTITY_LOG_LEVEL);
 end;
 
 procedure TXBaseGameClient.CL_ParseTELine;
-const T = 'CL_ParseTELine';
 var
   StartPosition, EndPosition: TVec3F;
   LifeTime: Int16;
@@ -3387,16 +3062,9 @@ begin
   EndPosition := MSG.ReadCoord3;
   LifeTime := MSG.ReadInt16;
   MSG.Read(Color, SizeOf(Color));
-
-  Debug(T, [
-    'StartPosition: [', StartPosition.ToString, '], ',
-    'EndPosition: [', EndPosition.ToString, '], ',
-    'Color: [', Color.ToString, '], ',
-    'LifeTime: ', LifeTime], TEMP_ENTITY_LOG_LEVEL);
 end;
 
 procedure TXBaseGameClient.CL_ParseTEBox;
-const T = 'CL_ParseTEBox';
 begin
   MSG.ReadCoord3;
   MSG.ReadCoord3;
@@ -3407,13 +3075,11 @@ begin
 end;
 
 procedure TXBaseGameClient.CL_ParseTEKillBeam;
-const T = 'CL_ParseTEKillBeam';
 begin
   MSG.ReadInt16;
 end;
 
 procedure TXBaseGameClient.CL_ParseTELargeFunnel;
-const T = 'CL_ParseTELargeFunnel';
 begin
   MSG.ReadCoord3;
   MSG.ReadInt16;
@@ -3421,7 +3087,6 @@ begin
 end;
 
 procedure TXBaseGameClient.CL_ParseTEBloodStream;
-const T = 'CL_ParseTEBloodStream';
 begin
   MSG.ReadCoord3;
   MSG.ReadCoord3;
@@ -3430,14 +3095,12 @@ begin
 end;
 
 procedure TXBaseGameClient.CL_ParseTEShowLine;
-const T = 'CL_ParseTEShowLine';
 begin
   MSG.ReadCoord3;
   MSG.ReadCoord3;
 end;
 
 procedure TXBaseGameClient.CL_ParseTEBlood;
-const T = 'CL_ParseTEBlood';
 begin
   MSG.ReadCoord3;
   MSG.ReadCoord3;
@@ -3446,7 +3109,6 @@ begin
 end;
 
 procedure TXBaseGameClient.CL_ParseTEDecal;
-const T = 'CL_ParseTEDecal';
 begin
   MSG.ReadCoord3;
   MSG.ReadUInt8;
@@ -3454,7 +3116,6 @@ begin
 end;
 
 procedure TXBaseGameClient.CL_ParseTEFizz;
-const T = 'CL_ParseTEFizz';
 begin
   MSG.ReadInt16;
   MSG.ReadInt16;
@@ -3462,7 +3123,6 @@ begin
 end;
 
 procedure TXBaseGameClient.CL_ParseTEModel;
-const T = 'CL_ParseTEModel';
 begin
   MSG.ReadCoord3;
   MSG.ReadCoord3;
@@ -3473,7 +3133,6 @@ begin
 end;
 
 procedure TXBaseGameClient.CL_ParseTEExplodeModel;
-const T = 'CL_ParseTEExplodeModel';
 begin
   MSG.ReadCoord3;
   MSG.ReadCoord;
@@ -3483,7 +3142,6 @@ begin
 end;
 
 procedure TXBaseGameClient.CL_ParseTEBreakModel;
-const T = 'CL_ParseTEBreakModel';
 begin
   MSG.ReadCoord3;
   MSG.ReadCoord3;
@@ -3496,7 +3154,6 @@ begin
 end;
 
 procedure TXBaseGameClient.CL_ParseTEGunShotDecal;
-const T = 'CL_ParseTEGunShotDecal';
 begin
   MSG.ReadCoord3;
   MSG.ReadInt16;
@@ -3504,7 +3161,6 @@ begin
 end;
 
 procedure TXBaseGameClient.CL_ParseTESpriteSpray;
-const T = 'CL_ParseTESpriteSpray';
 begin
   MSG.ReadCoord3;
   MSG.ReadCoord3;
@@ -3515,14 +3171,12 @@ begin
 end;
 
 procedure TXBaseGameClient.CL_ParseTEArmorRicochet;
-const T = 'CL_ParseTEArmorRicochet';
 begin
   MSG.ReadCoord3;
   MSG.ReadUInt8;
 end;
 
 procedure TXBaseGameClient.CL_ParseTEPlayerDecal;
-const T = 'CL_ParseTEPlayerDecal';
 var
   PlayerIndex, DecalNumber: UInt8;
   Position: TVec3F;
@@ -3535,17 +3189,9 @@ begin
   DecalNumber := MSG.ReadUInt8;
 
   Clear(ModelIndex);
-
-  Debug(T, [
-    'Position: [', Position.ToString, '], ',
-    'PlayerIndex: ', PlayerIndex, ', ',
-    'EntityIndex: ', EntityIndex, ', ',
-    'DecalNumber: ', DecalNumber, ', ',
-    'ModelIndex: ', ModelIndex], TEMP_ENTITY_LOG_LEVEL);
 end;
 
 procedure TXBaseGameClient.CL_ParseTEBubbles;
-const T = 'CL_ParseTEBubbles';
 begin
   MSG.ReadCoord3;
   MSG.ReadCoord3;
@@ -3556,7 +3202,6 @@ begin
 end;
 
 procedure TXBaseGameClient.CL_ParseTEBubbleTrail;
-const T = 'CL_ParseTEBubbleTrail';
 begin
   MSG.ReadCoord3;
   MSG.ReadCoord3;
@@ -3567,7 +3212,6 @@ begin
 end;
 
 procedure TXBaseGameClient.CL_ParseTEBloodSprite;
-const T = 'CL_ParseTEBloodSprite';
 var
   Position: TVec3F;
   Sprite1, Sprite2: Int16;
@@ -3578,38 +3222,24 @@ begin
   Sprite2 := MSG.ReadInt16;
   Color := MSG.ReadUInt8;
   Scale := MSG.ReadUInt8;
-
-  Debug(T, [
-    'Position: [', Position.ToString, '], ',
-    'Sprite1: ', Sprite1, ', ',
-    'Sprite2: ', Sprite2, ', ',
-    'Color: ', Color, ', ',
-    'Scale: ', Scale], TEMP_ENTITY_LOG_LEVEL);
 end;
 
 procedure TXBaseGameClient.CL_ParseTEWorldDecal;
-const T = 'CL_ParseTEWorldDecal';
 var
   Position: TVec3F;
   TextureIndex: UInt8;
 begin
   Position := MSG.ReadCoord3;
   TextureIndex := MSG.ReadUInt8;
-
-  Debug(T, [
-    'Position: [', Position.ToString, '], ',
-    'TextureIndex: ', TextureIndex], TEMP_ENTITY_LOG_LEVEL);
 end;
 
 procedure TXBaseGameClient.CL_ParseTEWorldDecalHigh;
-const T = 'CL_ParseTEWorldDecalHigh';
 begin
   MSG.ReadCoord3;
   MSG.ReadUInt8;
 end;
 
 procedure TXBaseGameClient.CL_ParseTEDecalHigh;
-const T = 'CL_ParseTEDecalHigh';
 begin
   MSG.ReadCoord3;
   MSG.ReadUInt8;
@@ -3617,7 +3247,6 @@ begin
 end;
 
 procedure TXBaseGameClient.CL_ParseTEProjectile;
-const T = 'CL_ParseTEProjectile';
 begin
   MSG.ReadCoord3;
   MSG.ReadCoord3;
@@ -3627,7 +3256,6 @@ begin
 end;
 
 procedure TXBaseGameClient.CL_ParseTESpray;
-const T = 'CL_ParseTESpray';
 var
   Position, Direction: TVec3F;
   Model: Int16;
@@ -3640,19 +3268,9 @@ begin
   Speed := MSG.ReadUInt8;
   Noise := MSG.ReadUInt8;
   RenderMode := MSG.ReadUInt8;
-
-  Debug(T,
-   ['Position: [', Position.ToString, '], ',
-    'Direction: [', Direction.ToString, '], ',
-    'Model: ', Model, ', ',
-    'Count: ', Count, ', ',
-    'Speed: ', Speed, ', ',
-    'Noise: ', Noise, ', ',
-    'RenderMode: ', RenderMode], TEMP_ENTITY_LOG_LEVEL);
 end;
 
 procedure TXBaseGameClient.CL_ParseTEPlayerSprites;
-const T = 'CL_ParseTEPlayerSprites';
 var
   Player, Sprite: Int16;
   Count, Variance: UInt8;
@@ -3664,7 +3282,6 @@ begin
 end;
 
 procedure TXBaseGameClient.CL_ParseTEParticleBurst;
-const T = 'CL_ParseTEParticleBurst';
 var
   Origin: TVec3F;
   Radius: Int16;
@@ -3674,16 +3291,9 @@ begin
   Radius := MSG.ReadInt16;
   Color := MSG.ReadUInt8;
   Duration := MSG.ReadUInt8;
-
-  Debug(T,
-   ['Origin: [', Origin.ToString, '], ',
-    'Radius: ', Radius, ', ',
-    'Color: ', Color, ', ',
-    'Duration: ', Duration], TEMP_ENTITY_LOG_LEVEL);
 end;
 
 procedure TXBaseGameClient.CL_ParseTEFireField;
-const T = 'CL_ParseTEFireField';
 var
   Origin: TVec3F;
   Radius, Model: Int16;
@@ -3697,18 +3307,9 @@ begin
   Count := MSG.ReadUInt8;
   Flags := MSG.ReadUInt8;
   Duration := MSG.ReadUInt8; // in seconds, will be randomized a bit
-
-  Debug(T,
-   ['Origin: [', Origin.ToString, '], ',
-    'Radius: ', Radius, ', ',
-    'Model: ', Model, ', ',
-    'Count: ', Count, ', ',
-    'Flags: ', Flags, ', ',
-    'Duration: ', Duration], TEMP_ENTITY_LOG_LEVEL);
 end;
 
 procedure TXBaseGameClient.CL_ParseTEPlayerAttachment;
-const T = 'CL_ParseTEPlayerAttachment';
 var
   Entity: UInt8;
   Offset: Float;
@@ -3718,16 +3319,9 @@ begin
   Offset := MSG.ReadCoord;
   Model := MSG.ReadInt16;
   Life := MSG.ReadInt16;
-
-  Debug(T, [
-    'Entity: ', Entity, ', ',
-    'Offset: ', Offset, ', ',
-    'Model: ', Model, ', ',
-    'Life: ', Life], TEMP_ENTITY_LOG_LEVEL);
 end;
 
 procedure TXBaseGameClient.CL_ParseTEKillPlayerAttachments;
-const T = 'CL_ParseTEKillPlayerAttachments';
 var
   EntityIndexOfPlayer: UInt8;
 begin
@@ -3735,12 +3329,9 @@ begin
 // write_byte(entity index of player)
 
   EntityIndexOfPlayer := MSG.ReadUInt8;
-
-  Debug(T, ['EntityIndexOfPlayer: ', EntityIndexOfPlayer], TEMP_ENTITY_LOG_LEVEL);
 end;
 
 procedure TXBaseGameClient.CL_ParseTEMultiGunShot;
-const T = 'CL_ParseTEMultiGunShot';
 var
   Origin, Direction: TVec3F;
   Noise: TVec2F;
@@ -3771,17 +3362,9 @@ begin
 
   Count := MSG.ReadUInt8;
   BulletHoleDecalIndex := MSG.ReadUInt8;
-
-  Debug(T, [
-    'Origin: [', Origin.ToString, '], ',
-    'Direction: [', Direction.ToString, '], ',
-    'Noise: [', Noise.ToString, '], ',
-    'Count: ', Count, ', ',
-    'BulletHoleDecalIndex: ', BulletHoleDecalIndex], TEMP_ENTITY_LOG_LEVEL);
 end;
 
 procedure TXBaseGameClient.CL_ParseTEUserTracer;
-const T = 'CL_ParseTEUserTracer';
 begin
 // write_byte(TE_USERTRACER)
 // write_coord(origin.x)
@@ -3807,7 +3390,6 @@ begin
 end;
 
 procedure TXBaseGameClient.CL_ParseDirectorEvent;
-const T = 'CL_ParseDirectorEvent';
 var
   LastPrimaryObject, LastSecondaryObject: UInt16;
   Flags: Int32;
@@ -3815,11 +3397,6 @@ begin
   LastPrimaryObject := DMSG.ReadUInt16;
   LastSecondaryObject := DMSG.ReadUInt16;
   Flags := DMSG.ReadInt32;
-
-  Debug(T, [
-    'LastPrimaryObject: ', LastPrimaryObject, ', ',
-    'LastSecondaryObject: ', LastSecondaryObject, ', ',
-    'Flags: ', Flags], DIRECTOR_LOG_LEVEL);
 
   if Assigned(OnDirectorEvent) then
   begin
@@ -3830,7 +3407,6 @@ begin
 end;
 
 procedure TXBaseGameClient.CL_ParseDirectorStatus;
-const T = 'CL_ParseDirectorStatus';
 var
   SpecSlots, SpecCount: Int32;
   RelayProxies: UInt16;
@@ -3838,32 +3414,24 @@ begin
   SpecSlots := DMSG.ReadInt32;
   SpecCount := DMSG.ReadInt32;
   RelayProxies := DMSG.ReadUInt16;
-
-  Debug(T, [
-    'SpecSlots: ', SpecSlots, ', ',
-    'SpecCount: ', SpecCount, ', ',
-    'RelayProxies: ', RelayProxies], DIRECTOR_LOG_LEVEL);
 end;
 
 procedure TXBaseGameClient.CL_ParseDirectorStuffText;
-const T = 'CL_ParseDirectorStuffText';
 var
   S: LStr;
 begin
   S := Trim(DMSG.ReadLStr);
-  Debug(T, [S], DIRECTOR_LOG_LEVEL);
   ReleaseEvent(OnDirectorCommand, S);
   CMD_ExecuteConsoleCommand(S);
 end;
 
 procedure TXBaseGameClient.CL_WriteMove;
-const T = 'CL_WriteMove';
 var
   I, O, C: Int32;
 begin
   if CL_UserCMD_Count > CMD_MAXBACKUP then
   begin
-    Error(T, ['UserCMD Count (', CL_UserCMD_Count, ') > CMD_MAXBACKUP (', CMD_MAXBACKUP, '), decreasing..']);
+    Error('CL_WriteMove', ['UserCMD Count (', CL_UserCMD_Count, ') > CMD_MAXBACKUP (', CMD_MAXBACKUP, '), decreasing..']);
     CL_UserCMD_Count := CMD_MAXBACKUP;
   end;
 
@@ -3897,14 +3465,13 @@ begin
 end;
 
 procedure TXBaseGameClient.CL_WriteCommand(Data: LStr);
-const T = 'CL_WriteCommand';
 begin
   if IsDemoPlayback then
     Exit;
 
   if State < CS_CONNECTION_ACCEPTED then
   begin
-    Error(T, ['Connection not accepted yet. Command rejected.']);
+    Error('CL_WriteCommand', ['Connection not accepted yet. Command rejected.']);
     Exit;
   end;
 
@@ -3912,8 +3479,6 @@ begin
 
   BF.WriteUInt8(CLC_STRINGCMD);
   BF.WriteLStr(Data);
-
-  Debug(T, [Data]);
 end;
 
 procedure TXBaseGameClient.CL_WriteCommand(Data: array of const);
@@ -3947,7 +3512,6 @@ begin
 end;
 
 procedure TXBaseGameClient.CL_WriteResourceList;
-const T = 'CL_WriteResourceList';
 var
   I: Int32;
 begin
@@ -3965,15 +3529,12 @@ begin
 
       if Flags and RES_CUSTOM > 0 then
         BF.Write(MD5, SizeOf(MD5));
-
-      Debug(T, [ToString], RESOURCELIST_LOG_LEVEL);
     end;
 
   Print([Length(MyResources), ' resources sent']);
 end;
 
 procedure TXBaseGameClient.CL_WriteFileConsistency;
-const T = 'CL_WriteFileConsistency';
 var
   I, J, C, O: Int32;
   P: PPackedConsistency;
@@ -4027,10 +3588,6 @@ begin
         end;
 
         BF.WriteUBits(M.AsLongs[0], 32);
-
-        Debug(T, [
-          'Name: "', Name, '", ',
-          'MD5: ', M.AsLongs[0]], CONSISTENCY_LOG_LEVEL);
       end
       else
       begin
@@ -4038,12 +3595,6 @@ begin
 
         BF.WriteUBits(WriteVec3F(P.MinS));
         BF.WriteUBits(WriteVec3F(P.MaxS));
-
-        Debug(T, [
-          'Name: "', Name, '", ',
-          'ForceType: ', P.ForceType, ', ',
-          'MinS: [', P.MinS.ToString, '], ',
-          'MaxS: [', P.MaxS.ToString, ']'], CONSISTENCY_LOG_LEVEL);
       end;
     end;
 
@@ -4064,27 +3615,20 @@ begin
 end;
 
 procedure TXBaseGameClient.CL_WriteCVarValue(Data: LStr);
-const T = 'CL_WriteCVarValue';
 begin
   BF.WriteUInt8(CLC_CVARVALUE);
   BF.WriteLStr(Data);
-
-  Debug(T, ['Data: "', Data, '"']);
 end;
 
 procedure TXBaseGameClient.CL_WriteCVarValue2(Index: Int32; CVar, Data: LStr);
-const T = 'CL_WriteCVarValue2';
 begin
   BF.WriteUInt8(CLC_CVARVALUE2);
   BF.WriteInt32(Index);
   BF.WriteLStr(CVar);
   BF.WriteLStr(Data);
-
-  Debug(T, ['Index: ', Index, ', CVar: "', CVar, '", Data: "', Data, '"']);
 end;
 
 procedure TXBaseGameClient.CL_InitializeConnection(Address: TNETAdr);
-const T = 'CL_InitializeConnection';
 begin
   State := CS_WAIT_CHALLENGE;
   ConnectionInitializingTime := GetTickCount;
@@ -4130,7 +3674,6 @@ begin
 end;
 
 procedure TXBaseGameClient.CL_InitializeGameEngine;
-const T = 'CL_InitializeGameEngine';
 begin
   Delta.Initialize;
   EngineType := GetEngineTypeFromName(ServerInfo.GameDir);
@@ -4163,13 +3706,12 @@ begin
 end;
 
 procedure TXBaseGameClient.CL_FinalizeConnection(Reason: LStr; IsReconnect: Boolean = False);
-const T = 'CL_FinalizeConnection';
 begin
   ConnectionFinalizingTime := GetTickCount;
 
   if State < CS_WAIT_CHALLENGE then
   begin
-    Error(T, ['Can''t drop, not initialized']);
+    Error('CL_FinalizeConnection', ['Can''t drop, not initialized']);
     Exit;
   end;
 
@@ -4283,17 +3825,14 @@ begin
 end;
 
 procedure TXBaseGameClient.CL_SignonReply;
-const T = 'CL_SignonReply';
 var
   I: Int32;
 begin
-  Debug(T, ['Index: ', SignonNum]);
-
   case SignonNum of
     1: ExecuteCommand('sendents');
     2: CL_InitializeGame;
   else
-    Error(T, ['Unknown Index: ', SignonNum]);
+    Error('CL_SignonReply', ['Unknown Index: ', SignonNum]);
   end;
 end;
 
@@ -4542,7 +4081,6 @@ begin
 end;
 
 procedure TXBaseGameClient.CL_ConfirmResources;
-const T = 'CL_ConfirmResources';
 var
   MapCheckSum, I: Int32;
   S: LStr;
@@ -4917,7 +4455,6 @@ begin
 end;
 
 function TXBaseGameClient.CL_InFieldOfView(APosition: TVec3F): Boolean;
-const T = 'CL_InFieldOfView';
 var
   F: Float;
   V: TVec3F;
@@ -4935,7 +4472,7 @@ begin
     V := (GetViewAngles.NormalizeAngles - GetOrigin.ViewTo(APosition).NormalizeAngles).NormalizeAngles;
     Result := (V.Y > -F) and (V.Y < F);
   except
-    Error(T, ['Angles: [', GetViewAngles.ToString, '], Origin: [', GetOrigin.ToString, '], FOV: ', F * 2]);
+    Error('CL_InFieldOfView', ['Angles: [', GetViewAngles.ToString, '], Origin: [', GetOrigin.ToString, '], FOV: ', F * 2]);
   end;
 end;
 
@@ -5317,7 +4854,6 @@ begin
 end;
 
 procedure TXBaseGameClient.CL_Upload_F;
-const Title = 'CL_Upload_F';
 var
   FileName: LStr;
   FileData: LStr;
@@ -5330,7 +4866,7 @@ begin
 
   if not FileExists(CMD.Tokens[1]) then
   begin
-    Error(Title, ['File not found: "', CMD.Tokens[1], '"']);
+    Error('CL_Upload_F', ['File not found: "', CMD.Tokens[1], '"']);
     Exit;
   end;
 
@@ -5543,7 +5079,6 @@ begin
 end;
 
 procedure TXBaseGameClient.CL_PlayDemo_F;
-const T = 'CL_PlayDemo_F';
 var
   I: Int32;
 
@@ -5609,16 +5144,9 @@ begin
   end;
 
   Map := ReadString(DEM.ReadLStr(260));
-  Debug(T, ['Map: ', Map]);
-
   GameDir := ReadString(DEM.ReadLStr(260));
-  Debug(T, ['GameDir: ', GameDir]);
-
   MapCheckSum := DEM.ReadUInt32;
-  Debug(T, ['MapCheckSum: ', MapCheckSum]);
-
   DirectoryEntriesOffset := DEM.ReadUInt32;
-  Debug(T, ['DirectoryEntriesOffset: ', DirectoryEntriesOffset]);
 
   if DirectoryEntriesOffset <> DEM.Size - 4 - (DEM_DIRECTORY_ENTRY_SIZE * 2) then
   begin
@@ -5629,7 +5157,6 @@ begin
   DEM.Skip(DirectoryEntriesOffset - DEM.Position);
 
   DirectoryEntriesNum := DEM.ReadUInt32;
-  Debug(T, ['DirectoryEntriesNum: ', DirectoryEntriesNum]);
 
   if DirectoryEntriesNum <> 2 then
   begin
@@ -5644,8 +5171,6 @@ begin
     DEM.Skip(8);
     DirEntryTime := DEM.ReadFloat;
     DEM.Skip(12);
-
-    Debug(T, ['DirEntry: ', DirEntryNum, ', Name: "', DirEntryTitle, '", Time: ', SecToTimeStr(Trunc(DirEntryTime))]);
   end;
 
   DEM.Position := DEM_HEADER_SIZE;

@@ -208,7 +208,6 @@ begin
 end;
 
 procedure TXSimpleGameClient.CL_ParseEVGUIMenu;
-const T = 'CL_ParseEVGUIMenu';
 var
   Data: TVGUIMenu;
 begin
@@ -220,15 +219,12 @@ begin
     {Keys := GMSG.ReadInt16;
     Time := GMSG.ReadUInt8;
     Name := GMSG.ReadString;}
-
-    Debug(T, ['Index: ', Index{, ', Keys: ', Keys, ', Time: ', Time, ', MultiPart: ', MultiPart, ', Name: "', Name, '"'}], GAME_EVENT_LOG_LEVEL);
   end;
 
   CL_ReadEVGUIMenu(Data);
 end;
 
 procedure TXSimpleGameClient.CL_ParseEStatusValue;
-const T = 'CL_ParseEStatusValue';
 var
   Index: UInt8;
   Value: Int16;
@@ -250,24 +246,18 @@ begin
     SetLength(StatusValue, Index);
 
   StatusValue[Index - 1] := Value;
-
-  Debug(T, ['Index: ', Index, ', Value: ', Value], GAME_EVENT_LOG_LEVEL);
 end;
 
 procedure TXSimpleGameClient.CL_ParseEStatusText;
-const T = 'CL_ParseEStatusText';
 var
   Flag: UInt8; // ?
   Data: LStr;
 begin
   Flag := GMSG.ReadUInt8;
   Data := GMSG.ReadLStr;
-
-  Debug(T, ['Flag: ', Flag, ', Data: "', Data, '"'], GAME_EVENT_LOG_LEVEL);
 end;
 
 procedure TXSimpleGameClient.CL_ParseETeamNames;
-const T = 'CL_ParseETeamNames';
 var
   I: Int32;
 begin
@@ -277,12 +267,10 @@ begin
     with Teams[I] do
     begin
       Name := GameTitle(GMSG.ReadLStr);
-      Debug(T, [Name], GAME_EVENT_LOG_LEVEL);
     end;
 end;
 
 procedure TXSimpleGameClient.CL_ParseEAmmoX;
-const T = 'CL_ParseEAmmoX';
 var
   AIndex: UInt8;
 begin
@@ -292,12 +280,9 @@ begin
     SetLength(Ammo, AIndex + 1);
 
   Ammo[AIndex] := GMSG.ReadUInt8;
-
-  Debug(T, ['Index: ', AIndex - 1, ', Amount: ', Ammo[AIndex]], GAME_EVENT_LOG_LEVEL);
 end;
 
 procedure TXSimpleGameClient.CL_ParseEScreenFade;
-const T = 'CL_ParseEScreenFade';
 begin
   with ScreenFade do
   begin
@@ -306,29 +291,19 @@ begin
     HoldTime := GMSG.ReadUInt16;
     Flags := GMSG.ReadUInt16;
     GMSG.Read(Color, SizeOf(Color));
-
-    Debug(T, [
-      'Duration: ', Duration, ', ',
-      'HoldTime: ', HoldTime, ', ',
-      'Flags: ', Flags, ', ',
-      'Color: [', Color.ToString, ']'], GAME_EVENT_LOG_LEVEL);
   end;
 end;
 
 procedure TXSimpleGameClient.CL_ParseEScreenShake;
-const T = 'CL_ParseEScreenShake';
 var
   Amplitude, Duration, Frequency: Int16;
 begin
   Amplitude := GMSG.ReadInt16;
   Duration := GMSG.ReadInt16;
   Frequency := GMSG.ReadInt16;
-
-  Debug(T, ['Amplitude: ', Amplitude, ', Duration: ', Duration, ', Frequency: ', Frequency], GAME_EVENT_LOG_LEVEL);
 end;
 
 procedure TXSimpleGameClient.CL_ParseEShowMenu;
-const T = 'CL_ParseEShowMenu';
 var
   MultiPart: UInt8;
 begin
@@ -338,8 +313,6 @@ begin
     Time := GMSG.ReadUInt8;
     MultiPart := GMSG.ReadUInt8;
     Data :=  Data + Utf8ToAnsi(GMSG.ReadLStr);
-
-    Debug(T, ['Keys: ', Keys, ', Time: ', Time, ', MultiPart: ', MultiPart, ', Data: "', Data, '"'], GAME_EVENT_LOG_LEVEL);
   end;
 
   if MultiPart = 0 then
@@ -350,81 +323,59 @@ begin
 end;
 
 procedure TXSimpleGameClient.CL_ParseEHideWeapon;
-const T = 'CL_ParseEHideWeapon';
 begin
   HideWeapon := GMSG.ReadUInt8;
-
-  Debug(T, ['Flags: ', HideWeapon], GAME_EVENT_LOG_LEVEL);
 end;
 
 procedure TXSimpleGameClient.CL_ParseEItemPickup;
-const T = 'CL_ParseEItemPickup';
 var
   ItemName: LStr;
 begin
   ItemName := GMSG.ReadLStr;
-
-  Debug(T, ['ItemName: "', ItemName, '"'], GAME_EVENT_LOG_LEVEL);
 end;
 
 procedure TXSimpleGameClient.CL_ParseEWeapPickup;
-const T = 'CL_ParseEWeapPickup';
 var
   AIndex: UInt8;
 begin
   AIndex := GMSG.ReadUInt8;
-
-  Debug(T, ['Index: ', AIndex], GAME_EVENT_LOG_LEVEL);
 end;
 
 procedure TXSimpleGameClient.CL_ParseEAmmoPickup;
-const T = 'CL_ParseEAmmoPickup';
 var
   AIndex, Amount: UInt8;
 begin
   AIndex := GMSG.ReadUInt8;
   Amount := GMSG.ReadUInt8;
-
-  Debug(T, ['Index: ', AIndex, ', Amount: ', Amount], GAME_EVENT_LOG_LEVEL);
 end;
 
 procedure TXSimpleGameClient.CL_ParseEServerName;
-const T = 'CL_ParseEServerName';
 begin
   ServerName := GMSG.ReadLStr;
-
-  Debug(T, ['"', ServerName, '"'], GAME_EVENT_LOG_LEVEL);
 end;
 
 procedure TXSimpleGameClient.CL_ParseEMOTD;
-const T = 'CL_ParseEMOTD';
 var
   Flag: UInt8;
   Data: LStr;
 begin
   Flag := GMSG.ReadUInt8;
   Data := GMSG.ReadLStr;
-
-  Debug(T, ['Flag: ', Flag, ', Data: "', Data, '"'], GAME_EVENT_LOG_LEVEL);
 end;
 
 procedure TXSimpleGameClient.CL_ParseEGameMode;
-const T = 'CL_ParseEGameMode';
 var
   B: UInt8;
 begin
   B := GMSG.ReadUInt8;
 
-  Debug(T, ['GameMode: ', B], GAME_EVENT_LOG_LEVEL);
-
   if B in [0..1] then
     IsTeamplay := B > 0
   else
-    Error(T, ['Unknown GameMode: ', B]);
+    Error('CL_ParseEGameMode', ['Unknown GameMode: ', B]);
 end;
 
 procedure TXSimpleGameClient.CL_ParseETeamScore;
-const T = 'CL_ParseETeamScore';
 var
   TeamName: LStr;
   S: Int16;
@@ -433,26 +384,21 @@ begin
   TeamName := GameTitle(GMSG.ReadLStr);
   S := GMSG.ReadInt16;
 
-  Debug(T, ['Team: "', TeamName, '", Score: ', S], GAME_EVENT_LOG_LEVEL);
-
   Team := FindTeamByName(@Teams, TeamName);
 
   if Team <> nil then
     Team.Score := S
   else
-    Error(T, ['Unknown team name: "', TeamName, '"']);
+    Error('CL_ParseETeamScore', ['Unknown team name: "', TeamName, '"']);
 end;
 
 procedure TXSimpleGameClient.CL_ParseETeamInfo;
-const T = 'CL_ParseETeamInfo';
 var
   Index: UInt8;
   Team: LStr;
 begin
   Index := GMSG.ReadUInt8;
   Team := GameTitle(GMSG.ReadLStr);
-
-  Debug(T, ['Index: ', Index, ', Team: "', Team, '"'], GAME_EVENT_LOG_LEVEL);
 
   // 3rd party amx plugins can send incorrect index,
   // so we need to check it
@@ -469,7 +415,6 @@ begin
 end;
 
 procedure TXSimpleGameClient.CL_ParseEScoreInfo;
-const T = 'CL_ParseEScoreInfo';
 var
   Index: UInt8;
   K, D, CID, TID: Int16;
@@ -487,13 +432,10 @@ begin
       Deaths := D;
       ClassID := CID;
       TeamID := TID;
-
-      Debug(T, ['Index: ', Index, ', Kills: ', Kills, ', Deaths: ', Deaths, ', Class: ', ClassID, ', Team: ', TeamID], GAME_EVENT_LOG_LEVEL);
     end;
 end;
 
 procedure TXSimpleGameClient.CL_ParseEDeathMsg;
-const T = 'CL_ParseEDeathMsg';
 var
   Data: TDeathMsg;
   C: UInt8;
@@ -516,8 +458,6 @@ begin
       Victim := @Players[C - 1];
 
     Weapon := GMSG.ReadLStr;
-
-    Debug(T, ['Killer: ', CL_GetPlayerIndex(Killer), ', Victim: ', CL_GetPlayerIndex(Victim), ', IsHeadshot: ', IsHeadshot, ', Weapon: "', Weapon, '"'], GAME_EVENT_LOG_LEVEL);
   end;
 
 
@@ -530,19 +470,16 @@ begin
 end;
 
 procedure TXSimpleGameClient.CL_ParseEInitHUD;
-const T = 'CL_ParseEInitHUD';
 begin
   //
 end;
 
 procedure TXSimpleGameClient.CL_ParseEResetHUD;
-const T = 'CL_ParseEResetHUD';
 begin
   //
 end;
 
 procedure TXSimpleGameClient.CL_ParseEWeaponList;
-const T = 'CL_ParseEWeaponList';
 var
   W: TWeapon;
 begin
@@ -562,17 +499,6 @@ begin
 
     if Commands.IndexOf(Name) = -1 then
       Commands.Add(Name, CL_WriteCommand, ParseAfter(Name, '_'), CMD_HIDE);
-
-    Debug(T, [
-      'Name: "', Name, '", ',
-      'AID1: ', PrimaryAmmoID, ', ',
-      'AMax1: ', PrimaryAmmoMaxAmount, ', ',
-      'AID2: ', SecondaryAmmoID, ', ',
-      'AMax2: ', SecondaryAmmoMaxAmount, ', ',
-      'Slot: ', SlotID, ', ',
-      'NumberInSlot: ', NumberInSlot, ', ',
-      'Index: ', Index, ', ',
-      'Flags: ', Flags], GAME_EVENT_LOG_LEVEL);
   end;
 
   if High(Weapons) < W.Index then
@@ -582,7 +508,6 @@ begin
 end;
 
 procedure TXSimpleGameClient.CL_ParseETextMsg;
-const T = 'CL_ParseETextMsg';
 var
   Data: TTextMsg;
 begin
@@ -609,15 +534,12 @@ begin
 
     if GMSG.Position < GMSG.Size then
       S4 := ReadLine(GMSG.ReadLStr);
-
-    Debug(T, ['DType: ', DType, ', Data: "', Data, '", S1: "', S1, '", S2: "', S2, '", S3: "', S3, '", S4: "', S4, '"'], GAME_EVENT_LOG_LEVEL);
   end;
 
   CL_ReadETextMsg(Data);
 end;
 
 procedure TXSimpleGameClient.CL_ParseESayText;
-const T = 'CL_ParseESayText';
 var
   Index: UInt8;
   SayText: TSayText;
@@ -642,8 +564,6 @@ begin
 
     if GMSG.Position < GMSG.Size then
       S4 := ReadLine(GMSG.ReadLStr);
-
-    Debug(T, ['Index: ', Index, ', S1: "', S1, '", S2: "', S2, '", S3: "', S3, '", S4: "', S4, '"'], GAME_EVENT_LOG_LEVEL);
   end;
 
   if Assigned(OnESayText) then
@@ -655,27 +575,20 @@ begin
 end;
 
 procedure TXSimpleGameClient.CL_ParseEHudText;
-const T = 'CL_ParseEHudText';
 var
   TextCode: LStr;
   InitHUDStyle: UInt8;
 begin
   TextCode := GMSG.ReadLStr;
   InitHUDStyle := GMSG.ReadUInt8;
-
-  Debug(T, ['TextCode: "', TextCode, '", InitHUDStyle: ', InitHUDStyle], GAME_EVENT_LOG_LEVEL);
 end;
 
 procedure TXSimpleGameClient.CL_ParseEBattery;
-const T = 'CL_ParseEBattery';
 begin
   Battery := GMSG.ReadInt16;
-
-  Debug(T, [Battery], GAME_EVENT_LOG_LEVEL);
 end;
 
 procedure TXSimpleGameClient.CL_ParseEDamage;
-const T = 'CL_ParseEDamage';
 var
   DmgSave, DmgTake: UInt8;
   DmgType: UInt32;
@@ -685,59 +598,38 @@ begin
   DmgTake := GMSG.ReadUInt8;
   DmgType := GMSG.ReadUInt32;
   Origin := GMSG.ReadCoord3;
-
-  Debug(T, [
-    'Save: ', DmgSave, ', ',
-    'Take: ', DmgTake, ', ',
-    'Type: ', DmgType, ', ',
-    'Origin: [', Origin.ToString, ']', GAME_EVENT_LOG_LEVEL]);
 end;
 
 procedure TXSimpleGameClient.CL_ParseEHealth;
-const T = 'CL_ParseEHealth';
 begin
   Health := GMSG.ReadUInt8;
-
-  Debug(T, ['Health: ', Health], GAME_EVENT_LOG_LEVEL);
 end;
 
 procedure TXSimpleGameClient.CL_ParseEFlashBat;
-const T = 'CL_ParseEFlashBat';
 begin
   FlashBat := GMSG.ReadUInt8;
-
-  Debug(T, [FlashBat], GAME_EVENT_LOG_LEVEL);
 end;
 
 procedure TXSimpleGameClient.CL_ParseEFlashlight;
-const T = 'CL_ParseEFlashlight';
 begin
   IsFlashlightActive := GMSG.ReadBool8;
   FlashBat := GMSG.ReadUInt8;
-
-  Debug(T, ['Active: ', IsFlashlightActive, ', Battery: ', FlashBat], GAME_EVENT_LOG_LEVEL);
 end;
 
 procedure TXSimpleGameClient.CL_ParseEGeiger;
-const T = 'CL_ParseEGeiger';
 var
   Distance: UInt8;
 begin
   Distance := GMSG.ReadUInt8;
-
-  Debug(T, ['Distance: ', Distance], GAME_EVENT_LOG_LEVEL);
 end;
 
 procedure TXSimpleGameClient.CL_ParseECurWeapon;
-const T = 'CL_ParseECurWeapon';
 var
   IsActive, WeaponID, ClipAmmo: UInt8;
 begin
   IsActive := GMSG.ReadUInt8;
   WeaponID := GMSG.ReadUInt8;
   ClipAmmo := GMSG.ReadUInt8;
-
-  Debug(T, ['IsActive: ', IsActive, ', WeaponID: ', WeaponID, ', ClipAmmo: ', ClipAmmo], GAME_EVENT_LOG_LEVEL);
 end;
 
 procedure TXSimpleGameClient.CL_ParseEReqState;
@@ -746,18 +638,14 @@ begin
 end;
 
 procedure TXSimpleGameClient.CL_ParseEVoiceMask;
-const T = 'CL_ParseEVoiceMask';
 var
   AudiblePlayersIndexBitSum, ServerBannedPlayersIndexBitSum: Int32;
 begin
   AudiblePlayersIndexBitSum := GMSG.ReadInt32;
   ServerBannedPlayersIndexBitSum := GMSG.ReadInt32;
-
-  Debug(T, ['AudiblePlayersIndexBitSum: ', AudiblePlayersIndexBitSum, ', ServerBannedPlayersIndexBitSum: ', ServerBannedPlayersIndexBitSum], GAME_EVENT_LOG_LEVEL);
 end;
 
 procedure TXSimpleGameClient.CL_ParseEHudTextArgs_CStrike;
-const T = 'CL_ParseEHudTextArgs';
 var
   TextCode, SubMsgs: LStr;
   InitHUDStyle, NumberOfSubMessages: UInt8;
@@ -782,15 +670,9 @@ begin
 
   for I := 0 to NumberOfSubMessages - 1 do
     GMSG.ReadLStr; // submsg
-
-  Debug(T, [
-    'TextCode: "', TextCode, '", ',
-    'InitHUDStyle: ', InitHUDStyle, ', ',
-    'NumberOfSubMessages: ', NumberOfSubMessages], GAME_EVENT_LOG_LEVEL)
 end;
 
 procedure TXSimpleGameClient.CL_ParseELocation_CStrike;
-const T = 'CL_ParseELocation';
 var
   Index: UInt8;
   L: LStr;
@@ -802,23 +684,18 @@ begin
     with Players[Index - 1] do
     begin
       Location := GMSG.ReadLStr;
-      Debug(T, ['Index: ', Index, ', Location: "', Location, '"'], GAME_EVENT_LOG_LEVEL);
     end;
 end;
 
 procedure TXSimpleGameClient.CL_ParseESpecHealth2_CStrike;
-const T = 'CL_ParseESpecHealth2';
 var
   PlayerID, FHealth: UInt8;
 begin
   FHealth := GMSG.ReadUInt8;
   PlayerID := GMSG.ReadUInt8;
-
-  Debug(T, ['PlayerID: ', PlayerID, ', Health: ', FHealth], GAME_EVENT_LOG_LEVEL);
 end;
 
 procedure TXSimpleGameClient.CL_ParseEHLTV_CStrike;
-const T = 'CL_ParseEHLTV';
 var
   PlayerID, Flags: UInt8;
   I: Int32;
@@ -836,12 +713,9 @@ begin
         if IsCSAlive and (GetCSPlayerTeam in [CS_TEAM_T..CS_TEAM_CT]) then
           if Flags and 128 > 0 then
             Players[I].Health := Flags and not 128;
-
-  Debug(T, ['PlayerID: ', PlayerID, ', Flags: ', Flags], GAME_EVENT_LOG_LEVEL);
 end;
 
 procedure TXSimpleGameClient.CL_ParseEHostageK_CStrike;
-const T = 'CL_ParseEHostageK';
 var
   Index: UInt8;
 begin
@@ -849,12 +723,9 @@ begin
 
   if Index <= Length(Hostages) then
     Clear(Hostages[Index - 1]);
-
-  Debug(T, ['Index: ', Index], GAME_EVENT_LOG_LEVEL);
 end;
 
 procedure TXSimpleGameClient.CL_ParseEHostagePos_CStrike;
-const T = 'CL_ParseEHostagePos';
 var
   Flag, Index: UInt8;
   Origin: TVec3F;
@@ -867,15 +738,9 @@ begin
     SetLength(Hostages, Index);
 
   Hostages[Index - 1] := Origin;
-
-  Debug(T, [
-    'Flag: ', Flag, ', ',
-    'Index: ', Index, ', ',
-    'Origin: [', Origin.ToString, ']'], GAME_EVENT_LOG_LEVEL);
 end;
 
 procedure TXSimpleGameClient.CL_ParseEClCorpse_CStrike;
-const T = 'CL_ParseEClCorpse';
 var
   Model: LStr;
   Position, Angle: TVec3F;
@@ -896,38 +761,21 @@ begin
 //  ClassID := GMSG.ReadUInt8;
   TeamID := GMSG.ReadUInt8;
   PlayerID := GMSG.ReadUInt8;
-
-  Debug(T, [
-    'Model: "', Model, '", ',
-    'Position: [', Position.ToString, '], ',
-    'Angle: [', Angle.ToString, '], ',
-    'Delay: ', Delay, ', ',
-    'Sequence: ', Sequence, ', ',
-    'ClassID: ', ClassID, ', ',
-    'TeamID: ', TeamID, ', ',
-    'PlayerID: ', PlayerID], GAME_EVENT_LOG_LEVEL);
 end;
 
 procedure TXSimpleGameClient.CL_ParseEBombPickup_CStrike;
-const T = 'CL_ParseEBombPickup';
 begin
   BombState.Active := False;
 end;
 
 procedure TXSimpleGameClient.CL_ParseEBombDrop_CStrike;
-const T = 'CL_ParseEBombDrop';
 begin
   BombState.Active := True;
   BombState.Position := GMSG.ReadCoord3;
   BombState.IsPlanted := GMSG.ReadBool8;
-
-  Debug(T, [
-    'Position: [', BombState.Position.ToString, '], ',
-    'IsPlanted: ', BombState.IsPlanted], GAME_EVENT_LOG_LEVEL);
 end;
 
 procedure TXSimpleGameClient.CL_ParseERadar_CStrike;
-const T = 'CL_ParseERadar';
 var
   Index: UInt8;
   Position: TVec3F;
@@ -940,7 +788,6 @@ begin
 end;
 
 procedure TXSimpleGameClient.CL_ParseEStatusIcon_CStrike;
-const T = 'CL_ParseEStatusIcon';
 var
   Status: UInt8;
   Sprite: LStr;
@@ -956,8 +803,6 @@ begin
 
   if Status > 0 then
     GMSG.Read(Color, SizeOf(Color));
-
-  Debug(T, ['Status: ', Status, ', Name: "', Sprite, '"'], GAME_EVENT_LOG_LEVEL);
 
   Icon := FindStatusIconByName(@StatusIcons, Sprite);
 
@@ -976,60 +821,44 @@ begin
 end;
 
 procedure TXSimpleGameClient.CL_ParseEBarTime_CStrike;
-const T = 'CL_ParseEBarTime';
 var
   Duration: Int16;
 begin
   Duration := GMSG.ReadInt16;
-
-  Debug(T, ['Duration: ', Duration], GAME_EVENT_LOG_LEVEL);
 end;
 
 procedure TXSimpleGameClient.CL_ParseEBlinkAcct_CStrike;
-const T = 'CL_ParseEBlinkAcct';
 var
   BlinkAmt: UInt8;
 begin
   BlinkAmt := GMSG.ReadUInt8;
-
-  Debug(T, ['BlinkAmt: ', BlinkAmt], GAME_EVENT_LOG_LEVEL);
 end;
 
 procedure TXSimpleGameClient.CL_ParseEArmorType_CStrike;
-const T = 'CL_ParseEArmorType';
 var
   Flag: UInt8;
 begin
   Flag := GMSG.ReadUInt8;
-
-  Debug(T, ['Flag: ', Flag], GAME_EVENT_LOG_LEVEL);
 end;
 
 procedure TXSimpleGameClient.CL_ParseEMoney_CStrike;
-const T = 'CL_ParseEMoney';
 var
   Flag: UInt8;
 begin
   Money := GMSG.ReadInt32;
   Flag := GMSG.ReadUInt8;
-
-  Debug(T, ['Money: ', Money, ', Flag: ', Flag], GAME_EVENT_LOG_LEVEL);
 end;
 
 procedure TXSimpleGameClient.CL_ParseERoundTime_CStrike;
-const T = 'CL_ParseERoundTime';
 var
   Time: Int16;
 begin
   Time := GMSG.ReadInt16;
 
   CL_ReadERoundTime(Time);
-
-  Debug(T, ['Time: ', Time], GAME_EVENT_LOG_LEVEL);
 end;
 
 procedure TXSimpleGameClient.CL_ParseESendAudio_CStrike;
-const T = 'CL_ParseESendAudio';
 var
   Sender: UInt8;
   AudioCode: LStr;
@@ -1038,12 +867,9 @@ begin
   Sender := GMSG.ReadUInt8;
   AudioCode := GMSG.ReadLStr;
   Pitch := GMSG.ReadInt16;
-
-  Debug(T, ['Sender: ', Sender, ', AudioCode: ', AudioCode, ', Pitch: ', Pitch], GAME_EVENT_LOG_LEVEL);
 end;
 
 procedure TXSimpleGameClient.CL_ParseEScoreAttrib_CStrike;
-const T = 'CL_ParseEScoreAttrib';
 var
   Index,
   Attrib: UInt8;
@@ -1055,12 +881,10 @@ begin
     with Players[Index - 1] do
     begin
       ScoreAttrib := Attrib;
-      Debug(T, ['Index: ', Index, ', Flags: ', ScoreAttrib], GAME_EVENT_LOG_LEVEL);
     end;
 end;
 
 procedure TXSimpleGameClient.CL_ParseEDeathMsg_CStrike;
-const T = 'CL_ParseEDeathMsg';
 var
   Data: TDeathMsg;
   C: UInt8;
@@ -1085,12 +909,6 @@ begin
     IsHeadshot := GMSG.ReadBool8;
 
     Weapon := GMSG.ReadLStr;
-
-    Debug(T, [
-      'Killer: ', CL_GetPlayerIndex(Killer), ', ',
-      'Victim: ', CL_GetPlayerIndex(Victim), ', ',
-      'IsHeadshot: ', IsHeadshot, ', ',
-      'Weapon: "', Weapon, '"'], GAME_EVENT_LOG_LEVEL);
   end;
 
   if Assigned(OnEDeathMsg) then
@@ -1112,7 +930,6 @@ begin
 end;
 
 procedure TXSimpleGameClient.CL_ParseEScoreInfo_DMC;
-const T = 'CL_ParseEScoreInfo';
 var
   Index: UInt8;
   K, D, ID: Int16;
@@ -1128,45 +945,30 @@ begin
       Kills := K;
       Deaths := D;
       {ClassID :=ID};
-
-      Debug(T, ['Index: ', Index, ', Kills: ', Kills, ', Deaths: ', Deaths], GAME_EVENT_LOG_LEVEL);
     end;
 end;
 
 procedure TXSimpleGameClient.CL_ParseERandomPC_TFC;
-const T = 'CL_ParseERandomPC';
 begin
   RandomPC := GMSG.ReadUInt8;
-
-  Debug(T, [RandomPC], GAME_EVENT_LOG_LEVEL);
 end;
 
 procedure TXSimpleGameClient.CL_ParseEBuildSt_TFC;
-const T = 'CL_ParseEBuildSt';
 begin
   BuildState := GMSG.ReadInt16;
-
-  Debug(T, [BuildState], GAME_EVENT_LOG_LEVEL);
 end;
 
 procedure TXSimpleGameClient.CL_ParseEDetpack_TFC;
-const T = 'CL_ParseEDetpack';
 begin
   IsSettingDetpack := GMSG.ReadUInt8;
-
-  Debug(T, [IsSettingDetpack], GAME_EVENT_LOG_LEVEL);
 end;
 
 procedure TXSimpleGameClient.CL_ParseEFeign_TFC;
-const T = 'CL_ParseEFeign';
 begin
   IsFeigning := GMSG.ReadUInt8;
-
-  Debug(T, [IsFeigning], GAME_EVENT_LOG_LEVEL);
 end;
 
 procedure TXSimpleGameClient.CL_ParseETeamScore_TFC;
-const T = 'CL_ParseETeamScore';
 var
   TeamName: LStr;
   S, D: Int16;
@@ -1176,8 +978,6 @@ begin
   S := GMSG.ReadInt16;
   D := GMSG.ReadInt16;
 
-  Debug(T, ['Team: "', TeamName, '", Score: ', S, ', Deaths: ', D]);
-
   Team := FindTeamByName(@Teams, TeamName);
 
   if Team <> nil then
@@ -1186,23 +986,19 @@ begin
     Team.Deaths := D;
   end
   else
-    Error(T, ['Unknown team name: "', TeamName, '"']);
+    Error('CL_ParseETeamScore_TFC', ['Unknown team name: "', TeamName, '"']);
 end;
 
 procedure TXSimpleGameClient.CL_ParseETeamScore_DOD;
-const T = 'CL_ParseETeamScore';
 var
   TeamID: UInt8;
   Score: Int16;
 begin
   TeamID := GMSG.ReadUInt8;
   Score := GMSG.ReadInt16;
-
-  Debug(T, ['Team: "', TeamID, '", Score: ', Score], GAME_EVENT_LOG_LEVEL);
 end;
 
 procedure TXSimpleGameClient.CL_ParseEScoreInfo_DOD;
-const T = 'CL_ParseEScoreInfo';
 var
   Index: UInt8;
   K, D, ID: Int16;
@@ -1218,13 +1014,10 @@ begin
       Kills := K;
       Deaths := D;
       {ClassID :=ID};
-
-      Debug(T, ['Index: ', Index, ', Kills: ', Kills, ', Deaths: ', Deaths], GAME_EVENT_LOG_LEVEL);
     end;
 end;
 
 procedure TXSimpleGameClient.CL_ParseEDeathMsg_DOD;
-const T = 'CL_ParseEDeathMsg';
 var
   Data: TDeathMsg;
   C: UInt8;
@@ -1247,8 +1040,6 @@ begin
       Victim := @Players[C - 1];
 
     Weapon := {GMSG.ReadLStr}IntToStr(GMSG.ReadUInt8);
-
-    Debug(T, ['Killer: ', CL_GetPlayerIndex(Killer) + 1, ', Victim: ', CL_GetPlayerIndex(Victim), ', IsHeadshot: ', IsHeadshot, ', Weapon: "', Weapon, '"'], GAME_EVENT_LOG_LEVEL);
   end;
 
   if Assigned(OnEDeathMsg) then
@@ -1260,7 +1051,6 @@ begin
 end;
 
 procedure TXSimpleGameClient.CL_ParseEWeaponList_DOD;
-const T = 'CL_ParseEWeaponList';
 var
   W: TWeapon;
 begin
@@ -1698,7 +1488,6 @@ begin
 end;
 
 procedure TXSimpleGameClient.CL_ReadETextMsg(Data: TTextMsg);
-const T = 'CL_ReadETextMsg';
 begin
   if Assigned(OnETextMsg) then
   begin
@@ -1709,7 +1498,7 @@ begin
 end;
 
 procedure TXSimpleGameClient.CL_ReadEMenu(Data: TSimpleMenu);
-const T = 'CL_ReadEMenu';
+const
   BadChars: array [0..3] of LStr = ('\w', '\y', '\r', '\d');
 var
   I: Int32;
@@ -1755,7 +1544,6 @@ begin
 end;
 
 procedure TXSimpleGameClient.CL_ReadEVGUIMenu(Data: TVGUIMenu);
-const T = 'CL_ReadEVGUIMenu';
 begin
   if Assigned(OnEVGUIMenu) then
   begin
@@ -1766,7 +1554,6 @@ begin
 end;
 
 procedure TXSimpleGameClient.CL_ReadERoundTime(ATime: Int16);
-const T = 'CL_ReadERoundTime';
 begin
   FRoundStartTime := Round(Time);
   FRoundTime := ATime;

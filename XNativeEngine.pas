@@ -37,7 +37,6 @@ type
     FOnSlowFrame: TNotifyEvent;
 
     FOnError,
-    FOnDebug,
     FOnHint: TOnTitleData;
     FOnPrint: TOnEString;
 
@@ -52,7 +51,6 @@ type
     Laters: TList<TLaterRec>;
 
     procedure Error(Title: LStr; Data: array of const); overload;
-    procedure Debug(Title: LStr; Data: array of const; Level: UInt32 = 1);
     procedure Hint(Title: LStr; Data: array of const);
     procedure Print(Data: LStr); overload; virtual;
     procedure Print(Data: array of const); overload; virtual;
@@ -108,7 +106,6 @@ type
     property OnSlowFrame: TNotifyEvent read FOnSlowFrame write FOnSlowFrame;
 
     property OnError: TOnTitleData read FOnError write FOnError;
-    property OnDebug: TOnTitleData read FOnDebug write FOnDebug;
     property OnHint: TOnTitleData read FOnHint write FOnHint;
     property OnPrint: TOnEString read FOnPrint write FOnPrint;
   end;
@@ -126,23 +123,6 @@ begin
 
   Lock;
   OnError(Self, ClassName + '.' + Title, S);
-  UnLock;
-end;
-
-procedure TXNativeEngine.Debug(Title: LStr; Data: array of const; Level: UInt32 = 1);
-var
-  S: LStr;
-begin
-  if not Assigned(OnDebug) then
-    Exit;
-
-  if Developer < Level then
-    Exit;
-
-  StringFromVarRec(Data, S);
-
-  Lock;
-  OnDebug(Self, Title, S);
   UnLock;
 end;
 
