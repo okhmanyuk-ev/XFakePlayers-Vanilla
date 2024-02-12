@@ -104,7 +104,7 @@ var
    Year, Month, Day: Word;
 begin
    DecodeDate(S, Year, Month, Day);
-   Result := IntToStr(day) + SS + M[Month] + SS + IntToStr(Year);
+   Result := IntToStr(day) + ' ' + M[Month] + ' ' + IntToStr(Year);
 end;
 
 function LinesCountInFile(FileName: LStr): Int32;

@@ -1412,7 +1412,7 @@ begin
 
         for I := 0 to Count - 1 do
           with Triggers[I] do
-            WriteLine(S, SS + SS + IntToStr(I + 1) + ')' + SS + Key + ': "' + Value + '"');
+            WriteLine(S, '  ' + IntToStr(I + 1) + ') ' + Key + ': "' + Value + '"');
 
         Print([S]);
       end

@@ -680,7 +680,7 @@ begin
     if Trim(Data) = 'clear' then
       RichEdit1.Clear;
 
-    Log.Add(']' + SS + Data);
+    Log.Add('] ' + Data);
 
     if Length(Trim(Data)) > 0 then
     begin
@@ -1117,8 +1117,8 @@ begin
   while EClients.Items.Count < Clients.Count do
     with EClients.Items.Add do
     begin
-      SubItems.Add(SS);
-      SubItems.Add(SS);
+      SubItems.Add(' ');
+      SubItems.Add(' ');
 
       //Engine.Width := Engine.Width + 1;
       //Engine.Width := Engine.Width - 1;
@@ -1315,7 +1315,7 @@ begin
     L := L + 'Online: ' + IntToStr(Clients.Count) + ', Alive: ' + IntToStr(GetAliveCount)
   end
   else
-    L := SS;
+    L := ' ';
 
   Label14.Caption := L;
 end;
@@ -1588,16 +1588,16 @@ begin
   Randomize;
   ReportMemoryLeaksOnShutdown := False;
 
-  Header := Title + SS + IntToStr(VERSION_MAJOR);
+  Header := Title + ' ' + IntToStr(VERSION_MAJOR);
 
   if VERSION_MINOR > 0 then
-    Header := Header + SS + 'R' + IntToStr(VERSION_MINOR);
+    Header := Header + ' R' + IntToStr(VERSION_MINOR);
 
   if IS_BETA then
-    Header := Header + SS + 'beta';
+    Header := Header + ' beta';
 
   if BETA_VERSION > 0 then
-    Header := Header + SS + IntToStr(BETA_VERSION);
+    Header := Header + ' ' + IntToStr(BETA_VERSION);
 
   Log := TLogSystem.Create;
   Log.SetFileName('xfakeplayers_logs', FormatDateTime('dd.MM.yyyy', Now) + '_' + FormatDateTime('HH.mm.ss', Now) + '.txt');

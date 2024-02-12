@@ -446,14 +446,14 @@ begin
 
       if Flags = 0 then
         if Description <> '' then
-          WriteLine(S, SS + SS + IntToStr(J) + ')' + SS + Name + ' - ' + Description)
+          WriteLine(S, '  ' + IntToStr(J) + ') ' + Name + ' - ' + Description)
         else
-          WriteLine(S, SS + SS + IntToStr(J) + ')' + SS + Name)
+          WriteLine(S, '  ' + IntToStr(J) + ') ' + Name)
       else
         if Description <> '' then
-          WriteLine(S, SS + SS + IntToStr(J) + ')' + SS + Name + ' - ' + Description + ' (' +S2 + ')')
+          WriteLine(S, '  ' + IntToStr(J) + ') ' + Name + ' - ' + Description + ' (' +S2 + ')')
         else
-          WriteLine(S, SS + SS + IntToStr(J) + ')' + SS + Name + ' (' +S2 + ')')
+          WriteLine(S, '  ' + IntToStr(J) + ') ' + Name + ' (' +S2 + ')')
     end;
 
   Print([S]);
@@ -498,14 +498,14 @@ begin
 
       if Flags = 0 then
         if VType = V_STR then
-          WriteLine(S, SS + SS + IntToStr(J) + ')' + SS + Name + ' = "' + ToString + '"')
+          WriteLine(S, '  ' + IntToStr(J) + ') ' + Name + ' = "' + ToString + '"')
         else
-          WriteLine(S, SS + SS + IntToStr(J) + ')' + SS + Name + ' = ' + ToString)
+          WriteLine(S, '  ' + IntToStr(J) + ') ' + Name + ' = ' + ToString)
       else
         if VType = V_STR then
-          WriteLine(S, SS + SS + IntToStr(J) + ')' + SS + Name + ' = "' + ToString + '" (' + S2 + ')')
+          WriteLine(S, '  ' + IntToStr(J) + ') ' + Name + ' = "' + ToString + '" (' + S2 + ')')
         else
-          WriteLine(S, SS + SS + IntToStr(J) + ')' + SS + Name + ' = ' + ToString + ' (' + S2 + ')');
+          WriteLine(S, '  ' + IntToStr(J) + ') ' + Name + ' = ' + ToString + ' (' + S2 + ')');
     end;
 
   Print([S]);
@@ -553,7 +553,7 @@ begin
 
         for I := 0 to Count - 1 do
           with Aliases[I] do
-            WriteLine(S, SS + SS + IntToStr(I + 1) + ')' + SS + Key + ' - ' + Value);
+            WriteLine(S, '  ' + IntToStr(I + 1) + ') ' + Key + ' - ' + Value);
 
         Print([S]);
       end
@@ -836,7 +836,7 @@ begin
 
   // read params
   for I := 1 to ParamCount do
-    S := S + ParamStr(I) + SS;
+    S := S + ParamStr(I) + ' ';
 
   while Pos('+', S) <> 0 do
   begin

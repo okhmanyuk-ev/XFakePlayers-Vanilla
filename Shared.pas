@@ -104,7 +104,6 @@ procedure Clear(var Data: TRGBA); overload; inline;
 
 
 const
-  SS = ' ';
   ValidFileExt: array[1..9] of PLChar = ('mdl', 'tga', 'wad', 'spr', 'bsp', 'wav', 'mp3', 'res', 'txt');
 
 implementation
@@ -124,7 +123,7 @@ end;
 {$REGION 'Parse'}
 function FirstWord(Data: LStr): LStr;
 begin
-  Result := ParseBefore(Data, SS);
+  Result := ParseBefore(Data, ' ');
 end;
 
 function SecondWord(Data: LStr): LStr;
@@ -134,7 +133,7 @@ end;
 
 function SecondWordEnd(Data: LStr): LStr;
 begin
-  Result := TrimLeft(ParseAfter(Data, SS, False));
+  Result := TrimLeft(ParseAfter(Data, ' ', False));
 end;
 
 function RemoveQuotes(Data: LStr): LStr;
@@ -512,7 +511,7 @@ begin
   Result := '';
 
   for I := 1 to ParamCount do
-    S := S + LStr(ParamStr(I)) + SS;
+    S := S + LStr(ParamStr(I)) + ' ';
 
   while Pos('-', S) <> 0 do
   begin

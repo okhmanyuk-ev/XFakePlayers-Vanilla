@@ -94,7 +94,7 @@ label L1;
       Exit;
 
     if ATime then
-      SData := Other.GetTime + SS + '-' + SS + SData;
+      SData := Other.GetTime + ' - ' + SData;
 
     if Assigned(OnLog) and Releasing then
       OnLog(Self, Trim(SData));
@@ -139,7 +139,7 @@ end;
 
 procedure TLogSystem.Add;
 begin
-  Add(SS, False);
+  Add(' ', False);
 end;
 
 procedure TLogSystem.SetFileName(AFolderName, AFileName: LStr);

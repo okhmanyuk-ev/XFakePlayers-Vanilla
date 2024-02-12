@@ -165,7 +165,7 @@ begin
 
     for I := Low(Players) to High(Players) do
       with Players[I] do
-        Add([SS, I + 1, ') ', Name, '. Kills: ', Kills, ', Time: ', SecToTimeStr(Trunc(Time))]);
+        Add([' ', I + 1, ') ', Name, '. Kills: ', Kills, ', Time: ', SecToTimeStr(Trunc(Time))]);
 
     Add;
     Add(['Latency: ', Latency]);
@@ -184,7 +184,7 @@ begin
 
     for I := Low(Rules) to High(Rules) do
       with Rules[I] do
-        Add([SS, I + 1, ') ', CVar, ' - ', Value]);
+        Add([' ', I + 1, ') ', CVar, ' - ', Value]);
 
     Add;
     Add(['Latency: ', Latency]);

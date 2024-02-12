@@ -4952,7 +4952,7 @@ begin
 
       if C <> -1 then
         if (CVars[C].Flags and CVAR_USERINFO) > 0 then
-          ExecuteCommand(CMD.Tokens[1] + SS + '"' + CMD.Tokens[2] + '"')
+          ExecuteCommand(CMD.Tokens[1] + ' "' + CMD.Tokens[2] + '"')
         else
           goto L1
       else
@@ -5195,7 +5195,7 @@ begin
 
         for I := 0 to Count - 1 do
           with Consistencies[I] do
-            WriteLine(S, SS + SS + IntToStr(I + 1) + ')' + SS + Key + ': "' + Value + '"');
+            WriteLine(S, '  ' + IntToStr(I + 1) + ') ' + Key + ': "' + Value + '"');
 
         Print([S]);
       end
@@ -5236,7 +5236,7 @@ begin
 
         for I := 0 to Count - 1 do
           with FakeCVars[I] do
-            WriteLine(S, SS + SS + IntToStr(I + 1) + ')' + SS + Key + ' - ' + Value);
+            WriteLine(S, '  ' + IntToStr(I + 1) + ') ' + Key + ' - ' + Value);
 
         Print([S]);
       end
